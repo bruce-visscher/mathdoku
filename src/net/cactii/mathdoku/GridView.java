@@ -3,9 +3,6 @@ package net.cactii.mathdoku;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.srlee.DLX.DLX.SolveType;
-import com.srlee.DLX.MathDokuDLX;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -14,7 +11,6 @@ import android.graphics.DiscretePathEffect;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
@@ -74,9 +70,6 @@ public boolean mBadMaths;
 	public long mDate;
 	// Current theme
 	public int mTheme;
-	
-	// Used to avoid redrawing or saving grid during creation of new grid
-	public final Object mLock = new Object();
   
   public GridView(Context context) {
     super(context);
@@ -163,132 +156,114 @@ public boolean mBadMaths;
   }
   
   public void reCreate() {
-	  synchronized (mLock) {	// Avoid redrawing at the same time as creating puzzle
-		  int num_solns;
-		  int num_attempts = 0;
-		  this.mRandom = new Random();
-		  if (this.mGridSize < 4) return;
-		  do {
-			  this.mCells = new ArrayList<GridCell>();
-			  int cellnum = 0;
-			  for (int i = 0 ; i < this.mGridSize * this.mGridSize ; i++)
-				  this.mCells.add(new GridCell(this, cellnum++));
-			  randomiseGrid();
-			  this.mTrackPosX = this.mTrackPosY = 0;
-			  this.mCages = new ArrayList<GridCage>();
-			  CreateCages();
-			  num_attempts++;
-			  MathDokuDLX mdd = new MathDokuDLX(this.mGridSize, this.mCages);
-			  // Stop solving as soon as we find multiple solutions
-			  num_solns = mdd.Solve(SolveType.MULTIPLE);
-			  Log.d ("MathDoku", "Num Solns = " + num_solns);
-		  } while (num_solns > 1);
-		  Log.d ("MathDoku", "Num Attempts = " + num_attempts);
-		  this.mActive = true;
-		  this.mSelectorShown = false;
-		  this.setTheme(this.mTheme);
-	  }
+    //this.mGridSize = 6; // TODO: Change based on initalisation (xml?)
+	this.mRandom = new Random();
+    if (this.mGridSize < 4) return;
+    this.mCells = new ArrayList<GridCell>();
+    int cellnum = 0;
+    for (int i = 0 ; i < this.mGridSize * this.mGridSize ; i++)
+      this.mCells.add(new GridCell(this, cellnum++));
+    randomiseGrid();
+    this.mTrackPosX = this.mTrackPosY = 0;
+    this.mCages = new ArrayList<GridCage>();
+    CreateCages();
+    this.mActive = true;
+    this.mSelectorShown = false;
+    this.setTheme(this.mTheme);
   }
 
+  
+  /* Returns whether the given cell # is a member of any cage */
+  public boolean CellInAnyCage(int cell) {
+    for (GridCage cage : this.mCages) {
+      for (GridCell c : cage.mCells) {
+        if (c.mCellNumber == cell)
+          return true;
+      }
+    }
+    return false;
+  }
+  
   // Returns cage id of cell at row, column
   // Returns -1 if not a valid cell or cage
   public int CageIdAt(int row, int column) {
-	  if (row < 0 || row >= mGridSize || column < 0 || column >= mGridSize)
-		  return -1;
-	  return this.mCells.get(column + row*this.mGridSize).mCageId;
+    for (GridCell cell : this.mCells)
+      if (cell.mRow == row && cell.mColumn == column)
+        return cell.mCageId;
+    return -1;
   }
   
   public int CreateSingleCages() {
     int singles = this.mGridSize / 2;
-    boolean RowUsed[] = new boolean[mGridSize];
-    boolean ColUsed[] = new boolean[mGridSize];
-    boolean ValUsed[] = new boolean[mGridSize];
+    int cageId = 0;
     for (int i = 0 ; i < singles ; i++) {
-    	GridCell cell;
-    	while (true) {
-    		cell = mCells.get(mRandom.nextInt(mGridSize * mGridSize));
-    		if (!RowUsed[cell.mRow] && !ColUsed[cell.mColumn] && !ValUsed[cell.mValue-1])
-    			break;
+    	int cellNum;
+    	boolean foundCell = false;
+    	GridCell cell = null;
+    	while (!foundCell) {
+    		cellNum = this.mRandom.nextInt(this.mGridSize * this.mGridSize);
+    		cell = this.mCells.get(cellNum);
+    		foundCell = true;
+    		for (GridCell c : this.mCells) {
+    			if ((c.mRow == cell.mRow || c.mColumn == cell.mColumn) &&
+    					c.mCageId > -1) {
+    				foundCell = false;
+    				break;
+    			}
+    			if (c.mCellNumber != cell.mCellNumber && c.mValue == cell.mValue &&
+    					c.mCageId > -1) {
+    				foundCell = false;
+    				break;
+    			}
+    		}
     	}
-    	ColUsed[cell.mColumn] = true;
-    	RowUsed[cell.mRow] = true;
-    	ValUsed[cell.mValue-1] = true;
-    	GridCage cage = new GridCage(this, GridCage.CAGE_1);
-    	cage.mCells.add(cell);
+    	GridCage cage = new GridCage(this);
+    	cage.createCage(GridCage.CAGE_1, cell);
     	cage.setArithmetic();
-    	cage.setCageId(i);
+    	cage.setCageId(cageId++);
     	this.mCages.add(cage);
     }
-    return singles;
+    return cageId;
   }
    
   /* Take a filled grid and randomly create cages */
   public void CreateCages() {
+    int cageId = CreateSingleCages();
 
-	  boolean restart;
+    for (int cellNum = 0 ; cellNum < this.mCells.size() ; cellNum++) {
+      GridCell cell = this.mCells.get(cellNum);
+      if (CellInAnyCage(cell.mCellNumber))
+        continue; // Cell already in a cage, skip
+      boolean validCage;
+      int attempts = 0;
+      while (true) {
+        validCage = true;
+        attempts++;
+        GridCage cage = new GridCage(this);
+        cage.createCage(GridCage.CAGE_UNDEF, cell);
+        for (GridCell c : cage.mCells)
+            if (CellInAnyCage(c.mCellNumber))
+              validCage = false;
 
-	  do {
-		  restart = false;
-		  int cageId = CreateSingleCages();
-		  for (int cellNum = 0 ; cellNum < this.mCells.size() ; cellNum++) {
-			  GridCell cell = this.mCells.get(cellNum);
-			  if (cell.CellInAnyCage())
-				  continue; // Cell already in a cage, skip
+        if (cage.mType == GridCage.CAGE_UNDEF || attempts > 35) {
+        	ClearAllCages();
+        	cellNum = -1;
+        	cageId = CreateSingleCages();
+        	validCage = false;
+        	break;
+        }
 
-			  ArrayList<Integer> possible_cages = getvalidCages(cell);
-			  if (possible_cages.size() == 1) {	// Only possible cage is a single
-				  ClearAllCages();
-				  restart=true;
-				  break;
-			  }
 
-			  // Choose a random cage type from one of the possible (not single cage)
-			  int cage_type = possible_cages.get(mRandom.nextInt(possible_cages.size()-1)+1);
-			  GridCage cage = new GridCage(this, cage_type);
-			  int [][]cage_coords = GridCage.CAGE_COORDS[cage_type];
-			  for (int coord_num = 0; coord_num < cage_coords.length; coord_num++) {
-				  int col = cell.mColumn + cage_coords[coord_num][0];
-				  int row = cell.mRow + cage_coords[coord_num][1];
-				  cage.mCells.add(getCellAt(row, col));
-			  }
-
-			  cage.setArithmetic();  // Make the maths puzzle
-			  cage.setCageId(cageId++);  // Set cage's id
-			  this.mCages.add(cage);  // Add to the cage list
-		  }
-	  } while (restart);
-	  for (GridCage cage : this.mCages)
-		  cage.setBorders();
-  }
-  
-  public ArrayList<Integer> getvalidCages(GridCell origin)
-  {
-	  if (origin.CellInAnyCage())
-		  return null;
-	  
-	  boolean [] InvalidCages = new boolean[GridCage.CAGE_COORDS.length];
-	  
-	  // Don't need to check first cage type (single)
-	  for (int cage_num=1; cage_num < GridCage.CAGE_COORDS.length; cage_num++) {
-		  int [][]cage_coords = GridCage.CAGE_COORDS[cage_num];
-		  // Don't need to check first coordinate (0,0)
-		  for (int coord_num = 1; coord_num < cage_coords.length; coord_num++) {
-			  int col = origin.mColumn + cage_coords[coord_num][0];
-			  int row = origin.mRow + cage_coords[coord_num][1];
-			  GridCell c = getCellAt(row, col);
-			  if (c == null || c.CellInAnyCage()) {
-				  InvalidCages[cage_num] = true;
-				  break;
-			  }
-		  }
-	  }
-
-	  ArrayList<Integer> valid =  new ArrayList<Integer>();
-	  for (int i=0; i<GridCage.CAGE_COORDS.length; i++)
-		  if (!InvalidCages[i])
-			  valid.add(i);
-	  
-	  return valid;
+        if (validCage) {
+          cage.setArithmetic();  // Make the maths puzzle
+          cage.setCageId(cageId++);  // Set cage's id
+          this.mCages.add(cage);  // Add to the cage list
+          break;
+        }
+      }
+    }
+    for (GridCage cage : this.mCages)
+      cage.setBorders();
   }
   
   public void ClearAllCages() {
@@ -301,19 +276,18 @@ public boolean mBadMaths;
   
   public void clearUserValues() {
 	  for (GridCell cell : this.mCells) {
-		  cell.clearUserValue();
+		  cell.mUserValue = 0;
+		  cell.mPossibles.clear();
+		  this.invalidate();
 	  }
-	  this.invalidate();
   }
   
   /* Fetch the cell at the given row, column */
   public GridCell getCellAt(int row, int column) {
-	  if (row < 0 || row >= mGridSize)
-		  return null;
-	  if (column < 0 || column >= mGridSize)
-		  return null;
-	  
-	  return this.mCells.get(column + row*this.mGridSize);
+    for (GridCell cell : this.mCells)
+      if (cell.mRow == row && cell.mColumn == column)
+        return cell;
+    return null;
   }
   
   /*
@@ -325,8 +299,8 @@ public boolean mBadMaths;
   public void randomiseGrid() {
     int attempts;
     for (int value = 1 ; value < this.mGridSize+1 ; value++) {
+      attempts = 20;
       for (int row = 0 ; row < this.mGridSize ; row++) {
-        attempts = 20;
         GridCell cell;
         int column;
         while (true) {
@@ -366,10 +340,10 @@ public boolean mBadMaths;
   
   /* Determine if the given value is in the given column */
   public boolean valueInColumn(int column, int value) {
-		for (int row=0; row< mGridSize; row++)
-			if (this.mCells.get(column+row*mGridSize).mValue == value)
-				return true;
-	    return false;
+    for (GridCell cell : this.mCells)
+      if (cell.mColumn == column && cell.mValue == value)
+        return true;
+    return false;
   }
 
   
@@ -396,58 +370,58 @@ public boolean mBadMaths;
   
   @Override
   protected void onDraw(Canvas canvas) {
-	  synchronized (mLock) {	// Avoid redrawing at the same time as creating puzzle
-		  if (this.mGridSize < 4) return;
-		  if (this.mCages == null) return;
 
-		  int width = getMeasuredWidth();
+    if (this.mGridSize < 4) return;
+    if (this.mCages == null) return;
+    int width = getMeasuredWidth();
 
-		  if (width != this.mCurrentWidth)
-			  this.mCurrentWidth = width;
+    if (width != this.mCurrentWidth)
+      this.mCurrentWidth = width;
 
-		  // Fill canvas background
-		  canvas.drawColor(this.mBackgroundColor);
+    // Fill canvas background
+    canvas.drawColor(this.mBackgroundColor);
+    
+    // Check cage correctness
+    for (GridCage cage : this.mCages)
+      cage.userValuesCorrect();
+    
+    // Draw (dashed) grid
+    for (int i = 1 ; i < this.mGridSize ; i++) {
+      float pos = ((float)this.mCurrentWidth / (float)this.mGridSize) * i;
+      canvas.drawLine(0, pos, this.mCurrentWidth, pos, this.mGridPaint);
+      canvas.drawLine(pos, 0, pos, this.mCurrentWidth, this.mGridPaint);
+    }
+    
+    // Draw cells
+    for (GridCell cell : this.mCells) {
+  	  if ((cell.mUserValue > 0 && this.getNumValueInCol(cell) > 1) ||
+  			  (cell.mUserValue > 0 && this.getNumValueInRow(cell) > 1))
+  		  cell.mShowWarning = true;
+  	  else
+  		  cell.mShowWarning = false;
+        cell.onDraw(canvas, false);
+    }
 
-		  // Check cage correctness
-		  for (GridCage cage : this.mCages)
-			  cage.userValuesCorrect();
+    // Draw borders
+    canvas.drawLine(1, 1, this.mCurrentWidth-1, 1, this.mBorderPaint);
+    canvas.drawLine(1, 1, 1, this.mCurrentWidth-1, this.mBorderPaint);
+    canvas.drawLine(1, this.mCurrentWidth-1, this.mCurrentWidth-2, this.mCurrentWidth-2, this.mBorderPaint);
+    canvas.drawLine(this.mCurrentWidth-1, 1, this.mCurrentWidth-2, this.mCurrentWidth-2, this.mBorderPaint);
+    
+    // Draw cells
+    for (GridCell cell : this.mCells) {
+        cell.onDraw(canvas, true);
+    }
+    
+    if (this.mActive && this.isSolved()) {
+  	  if (this.mSolvedListener != null)
+  		  this.mSolvedListener.puzzleSolved();
+  	  if (this.mSelectedCell != null)
+  		  this.mSelectedCell.mSelected = false;
+  	  this.mActive = false;
+    }
 
-		  // Draw (dashed) grid
-		  for (int i = 1 ; i < this.mGridSize ; i++) {
-			  float pos = ((float)this.mCurrentWidth / (float)this.mGridSize) * i;
-			  canvas.drawLine(0, pos, this.mCurrentWidth, pos, this.mGridPaint);
-			  canvas.drawLine(pos, 0, pos, this.mCurrentWidth, this.mGridPaint);
-		  }
-
-		  // Draw cells
-		  for (GridCell cell : this.mCells) {
-			  if ((cell.isUserValueSet() && this.getNumValueInCol(cell) > 1) ||
-					  (cell.isUserValueSet() && this.getNumValueInRow(cell) > 1))
-				  cell.mShowWarning = true;
-			  else
-				  cell.mShowWarning = false;
-			  cell.onDraw(canvas, false);
-		  }
-
-		  // Draw borders
-		  canvas.drawLine(1, 1, this.mCurrentWidth-1, 1, this.mBorderPaint);
-		  canvas.drawLine(1, 1, 1, this.mCurrentWidth-1, this.mBorderPaint);
-		  canvas.drawLine(1, this.mCurrentWidth-1, this.mCurrentWidth-1, this.mCurrentWidth-1, this.mBorderPaint);
-		  canvas.drawLine(this.mCurrentWidth-1, 1, this.mCurrentWidth-1, this.mCurrentWidth-1, this.mBorderPaint);
-
-		  // Draw cells
-		  for (GridCell cell : this.mCells) {
-			  cell.onDraw(canvas, true);
-		  }
-
-		  if (this.mActive && this.isSolved()) {
-			  if (this.mSolvedListener != null)
-				  this.mSolvedListener.puzzleSolved();
-			  if (this.mSelectedCell != null)
-				  this.mSelectedCell.mSelected = false;
-			  this.mActive = false;
-		  }
-	  }
+    	// this.drawSolvedResult(canvas);
   }
   
   // Given a cell number, returns origin x,y coordinates.
@@ -572,7 +546,7 @@ public boolean mBadMaths;
   public int getNumValueInRow(GridCell ocell) {
 	  int count = 0;
 	  for (GridCell cell : this.mCells) {
-		  if (cell.mRow == ocell.mRow && cell.getUserValue() == ocell.getUserValue())
+		  if (cell.mRow == ocell.mRow && cell.mUserValue == ocell.mUserValue)
 			  count++;
 	  }
 	  return count;
@@ -581,7 +555,7 @@ public boolean mBadMaths;
   public int getNumValueInCol(GridCell ocell) {
 	  int count = 0;
 	  for (GridCell cell : this.mCells) {
-		  if (cell.mColumn == ocell.mColumn && cell.getUserValue() == ocell.getUserValue())
+		  if (cell.mColumn == ocell.mColumn && cell.mUserValue == ocell.mUserValue)
 			  count++;
 	  }
 	  return count;
@@ -590,14 +564,14 @@ public boolean mBadMaths;
   // Solve the puzzle by setting the Uservalue to the actual value
   public void Solve() {
 	  for (GridCell cell : this.mCells)
-		  cell.setUserValue(cell.mValue);
+		  cell.mUserValue = cell.mValue;
 	  invalidate();
   }
   
-  // Returns whether the puzzle is solved.
+  // Returns whether the puzle is solved.
   public boolean isSolved() {
 	  for (GridCell cell : this.mCells) {
-		  if (!cell.isUserValueSet())
+		  if (cell.mUserValue < 1)
 			  return false;
 		  if (getNumValueInCol(cell) != 1)
 			  return false;
@@ -610,44 +584,6 @@ public boolean mBadMaths;
 	  return true;
   }
 
-  // Checks whether the user has made any mistakes
-  public boolean isSolutionValidSoFar()
-  {
-	  for (GridCell cell : this.mCells)
-		  if (cell.isUserValueSet())
-			  if (cell.getUserValue() != cell.mValue)
-				  return false;
-	  
-	  return true;
-  }
-  
-  // Highlight those cells where the user has made a mistake
-  public void markInvalidChoices()
-  {
-	  boolean isValid = true;
-	  for (GridCell cell : this.mCells)
-		  if (cell.isUserValueSet())
-			  if (cell.getUserValue() != cell.mValue) {
-				  cell.setInvalidHighlight(true);
-				  isValid = false;
-			  }
-
-	  if (!isValid)
-		  invalidate();
-	  
-	  return;
-  }
-  
-  // Return the list of cells that are highlighted as invalid
-  public ArrayList<GridCell> invalidsHighlighted()
-  {
-	  ArrayList<GridCell> invalids = new ArrayList<GridCell>();
-	  for (GridCell cell : this.mCells)
-		  if (cell.getInvalidHighlight())
-			  invalids.add(cell);
-	  
-	  return invalids;
-  }
   
   public void setSolvedHandler(OnSolvedListener listener) {
 	  this.mSolvedListener = listener;

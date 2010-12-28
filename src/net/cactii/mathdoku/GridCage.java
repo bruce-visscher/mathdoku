@@ -1,6 +1,8 @@
 package net.cactii.mathdoku;
 
 import java.util.ArrayList;
+import java.util.Random;
+
 
 import android.util.Log;
 
@@ -14,110 +16,28 @@ public class GridCage {
   
   public static final int CAGE_UNDEF = -1;
   public static final int CAGE_1 = 0;
+  public static final int CAGE_2V = 1;
+  public static final int CAGE_2H = 2;
+  public static final int CAGE_3V = 3;
+  public static final int CAGE_3H = 4;
+  public static final int CAGE_3LL = 5;
+  public static final int CAGE_3LR = 6;
+  public static final int CAGE_3UL = 7;
+  public static final int CAGE_3UR = 8;
+  public static final int CAGE_4SQ = 9;
+  public static final int CAGE_4UL = 10;
+  public static final int CAGE_4UR = 11;
+  public static final int CAGE_4LL = 12;
+  public static final int CAGE_4LR = 13;
 
-  // O = Origin (0,0) - must be the upper leftmost cell
-  // X = Other cells used in cage
-  public static final int [][][] CAGE_COORDS = new int[][][] {
-	  // O
-	  {{0,0}},
-	  // O
-	  // X
-	  {{0,0},{0,1}},
-	  // OX
-	  {{0,0},{1,0}},
-	  // O
-	  // X
-	  // X
-	  {{0,0},{0,1},{0,2}},
-	  // OXX
-	  {{0,0},{1,0},{2,0}},
-	  // O
-	  // XX 
-	  {{0,0},{0,1},{1,1}},
-	  // O
-	  //XX
-	  {{0,0},{0,1},{-1,1}},
-	  // OX
-	  //  X
-	  {{0,0},{1,0},{1,1}},
-	  // OX
-	  // X
-	  {{0,0},{1,0},{0,1}},
-	  // OX
-	  // XX
-	  {{0,0},{1,0},{0,1},{1,1}},
-	  // OX
-	  // X
-	  // X
-	  {{0,0},{1,0},{0,1},{0,2}},
-	  // OX
-	  //  X
-	  //  X
-	  {{0,0},{1,0},{1,1},{1,2}},
-	  // O
-	  // X
-	  // XX
-	  {{0,0},{0,1},{0,2},{1,2}},
-	  // O
-	  // X
-	  //XX
-	  {{0,0},{0,1},{0,2},{-1,2}}
-	  /*
-	  // OXX
-	  // X
-	  {{0,0},{1,0},{2,0},{0,1}},
-	  // OXX
-	  //   X
-	  {{0,0},{1,0},{2,0},{2,1}},
-	  // O
-	  // XXX
-	  {{0,0},{0,1},{1,1},{2,1}},
-	  //  O
-	  //XXX
-	  {{0,0},{-2,1},{-1,1},{0,1}},
-	  // O
-	  // XX
-	  // X
-	  {{0,0},{0,1},{0,2},{1,1}},
-	  // O
-	  //XX
-	  // X
-	  {{0,0},{0,1},{0,2},{-1,1}},
-	  // OXX
-	  //  X
-	  {{0,0},{1,0},{2,0},{1,1}},
-	  // O
-	  //XXX
-	  {{0,0},{-1,1},{0,1},{1,1}},
-	  // OXXX
-	  {{0,0},{1,0},{2,0},{3,0}},
-	  // O
-	  // X
-	  // X
-	  // X
-	  {{0,0},{0,1},{0,2},{0,3}},
-	  // O
-	  // XX
-	  //  X
-	  {{0,0},{0,1},{1,1},{1,2}},
-	  // O
-	  //XX
-	  //X
-	  {{0,0},{0,1},{-1,1},{-1,2}},
-	  // OX
-	  //  XX
-	  {{0,0},{1,0},{1,1},{2,1}},
-	  // OX
-	  //XX
-	  {{0,0},{1,0},{0,1},{-1,1}}
-	  */
-  };
+
 
   // Action for the cage
   public int mAction;
   // Number the action results in
   public int mResult;
   // List of cage's cells
+  // public int[] mCells;
   public ArrayList<GridCell> mCells;
   // Type of the cage
   public int mType;
@@ -131,39 +51,195 @@ public class GridCage {
   public boolean mSelected;
   
   public GridCage (GridView context) {
-	  this.mContext = context;
-  }
-
-  public GridCage (GridView context, int type) {
-	  this.mContext = context;
-	  mType = type;
-	  mUserMathCorrect = true;
-	  mSelected = false;
-	  mCells = new ArrayList<GridCell>();
+    this.mContext = context;
   }
   
   public String toString() {
 	  String retStr = "";
-	  retStr += "Cage id: " + this.mId + ", Type: " + this.mType;
-	  retStr += ", Action: ";
-	  switch (this.mAction)
-	  {
-	  case ACTION_NONE:
-		  retStr += "None"; break;
-	  case ACTION_ADD:
-		  retStr += "Add"; break;
-	  case ACTION_SUBTRACT:
-		  retStr += "Subtract"; break;
-	  case ACTION_MULTIPLY:
-		  retStr += "Multiply"; break;
-	  case ACTION_DIVIDE:
-		  retStr += "Divide"; break;
-	  }
-	  retStr += ", Result: " + this.mResult;
-	  retStr += ", cells: ";
+	  retStr += "Cage id: " + this.mId + ", Type " + this.mType + ", cells: ";
 	  for (GridCell cell : this.mCells)
 		  retStr += cell.mCellNumber + ", ";
 	  return retStr;
+  }
+  
+  /*
+   * Create a random cage that starts at 'origin' and
+   * fits the grid in our context.
+   */
+  public void createCage(int type, GridCell origin) {
+
+    ArrayList<Integer> attempts = new ArrayList<Integer>();
+    this.mCells = new ArrayList<GridCell>();
+    this.mCells.add(origin);
+    this.mType = type;
+    this.mUserMathCorrect = true;
+    this.mSelected = false;
+    
+    while (type == CAGE_UNDEF && attempts.size() < 13) {
+      
+      this.mCells.clear();
+      this.mCells.add(origin);
+      
+      do {
+    	  this.mType = this.mContext.mRandom.nextInt(13) + 1;
+      } while (attempts.contains(this.mType));
+
+      attempts.add(this.mType);
+      type = this.mType;
+      switch (this.mType) {
+        case CAGE_1 :
+
+          type = -1;
+          if (attempts.size() < 14)
+        	  continue;
+          /*
+          if (origin.mCellNumber < (this.mContext.mGridSize * this.mContext.mGridSize) -1) {
+            type = -1;
+            continue;
+          }
+          */
+            
+          break;
+        case CAGE_2V :
+          if (origin.mRow > this.mContext.mGridSize-2) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+
+          break;
+        case CAGE_2H :
+          if (origin.mColumn > this.mContext.mGridSize-2) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+          break;
+        case CAGE_3V :
+          if (origin.mRow > this.mContext.mGridSize-3) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn));
+          break;
+        case CAGE_3H :
+          if (origin.mColumn > this.mContext.mGridSize - 3) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+2));
+          break;
+        case CAGE_3LL :
+          if (origin.mColumn > this.mContext.mGridSize-2 ||
+              origin.mRow > this.mContext.mGridSize-2) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn+1));
+          break;
+        case CAGE_3LR :
+          if (origin.mRow > this.mContext.mGridSize-2 ||
+              origin.mColumn < 1) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn-1));
+          break;
+        case CAGE_3UR :
+          if (origin.mColumn > this.mContext.mGridSize-2 ||
+              origin.mRow > this.mContext.mGridSize-2) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn+1));
+
+          break;
+        case CAGE_3UL :
+          if (origin.mColumn > this.mContext.mGridSize-2 ||
+              origin.mRow > this.mContext.mGridSize-2) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+          break;
+        case CAGE_4SQ :
+          if (origin.mColumn > this.mContext.mGridSize-2 ||
+              origin.mRow > this.mContext.mGridSize-2 ||
+              this.mContext.mGridSize > 7) {
+            type = -1;
+            this.mType = CAGE_UNDEF;
+            continue;
+          }
+          this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+          this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn+1));
+          break;
+        case CAGE_4UL :
+            if (origin.mColumn > this.mContext.mGridSize-2 ||
+                origin.mRow > this.mContext.mGridSize-3 ||
+                this.mContext.mGridSize > 7) {
+              type = -1;
+              this.mType = CAGE_UNDEF;
+              continue;
+            }
+            this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn));
+            break;
+        case CAGE_4UR :
+            if (origin.mColumn > this.mContext.mGridSize-2 ||
+                origin.mRow > this.mContext.mGridSize-3 ||
+                this.mContext.mGridSize > 7) {
+              type = -1;
+              this.mType = CAGE_UNDEF;
+              continue;
+            }
+            this.mCells.add(this.mContext.getCellAt(origin.mRow, origin.mColumn+1));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn+1));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn+1));
+            break;
+        case CAGE_4LL :
+            if (origin.mColumn > this.mContext.mGridSize-2 ||
+                origin.mRow > this.mContext.mGridSize-3 ||
+                this.mContext.mGridSize > 7) {
+              type = -1;
+              this.mType = CAGE_UNDEF;
+              continue;
+            }
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn+1));
+            break;
+        case CAGE_4LR :
+            if (origin.mColumn < 1 ||
+                origin.mRow > this.mContext.mGridSize-3 ||
+                this.mContext.mGridSize > 7) {
+              type = -1;
+              this.mType = CAGE_UNDEF;
+              continue;
+            }
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+1, origin.mColumn));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn));
+            this.mCells.add(this.mContext.getCellAt(origin.mRow+2, origin.mColumn-1));
+            break;
+        }
+      
+    }
   }
   
   /*
@@ -251,31 +327,31 @@ public class GridCage {
   // Returns whether the cage is solved (with mUserValue)
   public boolean isSolved() {
 	  if (this.mCells.size() == 1)
-		  return (this.mCells.get(0).mValue == this.mCells.get(0).getUserValue());
+		  return (this.mCells.get(0).mValue == this.mCells.get(0).mUserValue);
 	  
 	  switch (this.mAction) {
 		  case ACTION_ADD :
 			  int total = 0;
 			  for (GridCell cell : this.mCells) {
-				  total += cell.getUserValue();
+				  total += cell.mUserValue;
 			  }
 			  return (total == this.mResult);
 		  case ACTION_MULTIPLY :
 			  int mtotal = 1;
 			  for (GridCell cell : this.mCells) {
-				  mtotal *= cell.getUserValue();
+				  mtotal *= cell.mUserValue;
 			  }
 			  return (mtotal == this.mResult);
 		  case ACTION_DIVIDE :
-			  if (this.mCells.get(0).getUserValue() > this.mCells.get(1).getUserValue())
-				  return ((this.mCells.get(0).getUserValue() / this.mCells.get(1).getUserValue()) == this.mResult);
+			  if (this.mCells.get(0).mUserValue > this.mCells.get(1).mUserValue)
+				  return ((this.mCells.get(0).mUserValue / this.mCells.get(1).mUserValue) == this.mResult);
 			  else
-				  return ((this.mCells.get(1).getUserValue() / this.mCells.get(0).getUserValue()) == this.mResult);
+				  return ((this.mCells.get(1).mUserValue / this.mCells.get(0).mUserValue) == this.mResult);
 		  case ACTION_SUBTRACT :
-			  if (this.mCells.get(0).getUserValue() > this.mCells.get(1).getUserValue())
-				  return ((this.mCells.get(0).getUserValue() - this.mCells.get(1).getUserValue()) == this.mResult);
+			  if (this.mCells.get(0).mUserValue > this.mCells.get(1).mUserValue)
+				  return ((this.mCells.get(0).mUserValue - this.mCells.get(1).mUserValue) == this.mResult);
 			  else
-				  return ((this.mCells.get(1).getUserValue() - this.mCells.get(0).getUserValue()) == this.mResult);
+				  return ((this.mCells.get(1).mUserValue - this.mCells.get(0).mUserValue) == this.mResult);
 	  }
 	  throw new RuntimeException("isSolved() got to an unreachable point " + this.mAction + ": " + this.toString());
   }
@@ -287,7 +363,7 @@ public class GridCage {
   public void userValuesCorrect() {
     this.mUserMathCorrect = true;
     for (GridCell cell : this.mCells)
-      if (!cell.isUserValueSet()) {
+      if (cell.mUserValue < 1) {
         this.setBorders();
         return;
       }
@@ -337,155 +413,5 @@ public class GridCage {
         	cell.mBorderTypes[3] = GridCell.BORDER_SOLID;
     }
   }
-
-/*
- * Generates all combinations of numbers which satisfy the cage's arithmetic
- * and MathDoku constraints i.e. a digit can only appear once in a column/row 
- */
-public ArrayList<int[]> GetPossibleNums()
-{
-	ArrayList<int[]> AllResults = new ArrayList<int[]>();
-
-	switch (this.mAction) {
-	case ACTION_NONE:
-		assert (mCells.size() == 1);
-		int number[] = {mResult};
-		AllResults.add(number);
-		break;
-	  case ACTION_SUBTRACT:
-		  assert(mCells.size() == 2);
-		  for (int i1=1; i1<=this.mContext.mGridSize; i1++)
-			  for (int i2=1; i2<=this.mContext.mGridSize; i2++)
-				  if (i2 - i1 == mResult || i1 - i2 == mResult) {
-					  int numbers[] = {i1, i2};
-					  AllResults.add(numbers);
-				  }
-		  break;
-	  case ACTION_DIVIDE:
-		  assert(mCells.size() == 2);
-		  for (int i1=1; i1<=this.mContext.mGridSize; i1++)
-			  for (int i2=1; i2<=this.mContext.mGridSize; i2++)
-				  if (mResult*i1 == i2 || mResult*i2 == i1) {
-					  int numbers[] = {i1, i2};
-					  AllResults.add(numbers);
-				  }
-		  break;
-	  case ACTION_ADD:
-		  AllResults = getalladdcombos(this.mContext.mGridSize,mResult,mCells.size());
-		  break;
-	  case ACTION_MULTIPLY:
-		  AllResults = getallmultcombos(this.mContext.mGridSize,mResult,mCells.size());
-		  break;
-	}
-	return AllResults;
-}
-
-// The following two variables are required by the recursive methods below.
-// They could be passed as parameters of the recursive methods, but this
-// reduces performance.
-private int[] numbers;
-private ArrayList<int[]> result_set;
-
-private ArrayList<int[]> getalladdcombos (int max_val, int target_sum, int n_cells)
-{
-	numbers = new int[n_cells];
-	result_set = new ArrayList<int[]> ();
-	getaddcombos(max_val, target_sum, n_cells);
-	return result_set;
-}
-
-/*
- * Recursive method to calculate all combinations of digits which add up to target
- * 
- * @param max_val		maximum permitted value of digit (= dimension of grid)
- * @param target_sum	the value which all the digits should add up to
- * @param n_cells		number of digits still to select
- */
-private void getaddcombos(int max_val, int target_sum, int n_cells)
-{
-	for (int n=1; n<= max_val; n++)
-	{
-		if (n_cells == 1)
-		{
-			if (n == target_sum) {
-				numbers[0] = n;
-				if (satisfiesConstraints(numbers))
-					result_set.add(numbers.clone());
-			}
-		}
-		else {
-			numbers[n_cells-1] = n;
-			getaddcombos(max_val, target_sum-n, n_cells-1);
-		}
-	}
-	return;
-}
-
-private ArrayList<int[]> getallmultcombos (int max_val, int target_sum, int n_cells)
-{
-	numbers = new int[n_cells];
-	result_set = new ArrayList<int[]> ();
-	getmultcombos(max_val, target_sum, n_cells);
-	
-	return result_set;
-}
-
-/*
- * Recursive method to calculate all combinations of digits which multiply up to target
- * 
- * @param max_val		maximum permitted value of digit (= dimension of grid)
- * @param target_sum	the value which all the digits should multiply up to
- * @param n_cells		number of digits still to select
- */
-private void getmultcombos(int max_val, int target_sum, int n_cells)
-{
-	for (int n=1; n<= max_val; n++)
-	{
-		if (target_sum % n != 0)
-			continue;
-		
-		if (n_cells == 1)
-		{
-			if (n == target_sum) {
-				numbers[0] = n;
-				if (satisfiesConstraints(numbers))
-					result_set.add(numbers.clone());
-			}
-		}
-		else {
-			numbers[n_cells-1] = n;
-			getmultcombos(max_val, target_sum/n, n_cells-1);
-		}
-	}
-	return;
-}
-
-/*
- * Check whether the set of numbers satisfies all constraints
- * Looking for cases where a digit appears more than once in a column/row
- * Constraints:
- * 0 -> (mGridSize * mGridSize)-1 = column constraints
- * (each column must contain each digit) 
- * mGridSize * mGridSize -> 2*(mGridSize * mGridSize)-1 = row constraints
- * (each row must contain each digit) 
- */
-private boolean satisfiesConstraints(int[] test_nums) {
-	
-	boolean constraints[] = new boolean[mContext.mGridSize*mContext.mGridSize*2];
-	int constraint_num;
-	for (int i = 0; i<this.mCells.size(); i++) {
-		constraint_num = mContext.mGridSize*(test_nums[i]-1) + mCells.get(i).mColumn;
-		if (constraints[constraint_num])
-			return false;
-		else
-			constraints[constraint_num]= true;
-		constraint_num = mContext.mGridSize*mContext.mGridSize + mContext.mGridSize*(test_nums[i]-1) + mCells.get(i).mRow;
-		if (constraints[constraint_num])
-			return false;
-		else
-			constraints[constraint_num]= true;
-	}
-	return true;
-}
 
 }

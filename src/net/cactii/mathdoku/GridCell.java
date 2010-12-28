@@ -23,7 +23,7 @@ public class GridCell {
   // Value of the digit in the cell
   public int mValue;
   // User's entered value
-  private int mUserValue;
+  public int mUserValue;
   // Id of the enclosing cage
   public int mCageId;
   // String of the cage
@@ -38,8 +38,6 @@ public class GridCell {
   public boolean mSelected;
   // Player cheated (revealed this cell)
   public boolean mCheated;
-  // Highlight user input isn't correct value
-  private boolean mInvalidHighlight;
   
   public static final int BORDER_NONE = 0;
   public static final int BORDER_SOLID = 1;
@@ -75,7 +73,6 @@ public class GridCell {
     this.mUserValue = 0;
     this.mShowWarning = false;
     this.mCheated = false;
-    this.mInvalidHighlight = false;
 
     this.mPosX = 0;
     this.mPosY = 0;
@@ -121,7 +118,6 @@ public class GridCell {
     this.mPossiblesPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     this.mPossiblesPaint.setColor(0xFF000000);
     this.mPossiblesPaint.setTextSize(10);
-	this.mPossiblesPaint.setFakeBoldText(true);
     this.mPossiblesPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
     
     this.mPossibles = new ArrayList<Integer>();
@@ -147,7 +143,7 @@ public class GridCell {
 	    this.mCageTextPaint.setTypeface(this.mContext.mFace);
 	  } else if (theme == GridView.THEME_NEWSPAPER) {
 	    this.mDashedBorderPaint.setPathEffect(null);
-	    this.mBorderPaint.setAntiAlias(false);
+	    this.mBorderPaint.setAntiAlias(true);
 		this.mBorderPaint.setPathEffect(null);
 	    this.mWrongBorderPaint.setAntiAlias(true);
 	    this.mWrongBorderPaint.setPathEffect(null);
@@ -200,37 +196,11 @@ public class GridCell {
 		  this.mPossibles.remove(new Integer(digit));
   }
   
-  public int getUserValue() {
-	  return mUserValue;
-  }
-
-  public boolean isUserValueSet() {
-	  return mUserValue != 0;
-  }
-
   public void setUserValue(int digit) {
-	  this.mPossibles.clear();
-	  this.mUserValue = digit;
-	  mInvalidHighlight = false;
+    this.mPossibles.clear();
+    this.mUserValue = digit;
   }
   
-  public void clearUserValue() {
-	  setUserValue(0);
-  }
-
-  /* Returns whether the cell is a member of any cage */
-  public boolean CellInAnyCage()
-  {
-	  return mCageId != -1;
-  }
-  
-  public void setInvalidHighlight(boolean value) {
-	  this.mInvalidHighlight = value;
-  }
-  public boolean getInvalidHighlight() {
-	  return this.mInvalidHighlight;
-  }
-
   /* Draw the cell. Border and text is drawn. */
   public void onDraw(Canvas canvas, boolean onlyBorders) {
     
@@ -249,7 +219,7 @@ public class GridCell {
     GridCell cellBelow = this.mContext.getCellAt(this.mRow+1, this.mColumn);
 
     if (!onlyBorders) {
-	    if ((this.mShowWarning && this.mContext.mDupedigits) || this.mInvalidHighlight)
+	    if (this.mShowWarning && this.mContext.mDupedigits)
 	    	canvas.drawRect(west + 1, north+1, east-1, south-1, this.mWarningPaint);
 	    if (this.mSelected)
 	    	canvas.drawRect(west+1, north+1, east-1, south-1, this.mSelectedPaint);
@@ -311,7 +281,7 @@ public class GridCell {
     	return;
     
     // Cell value
-    if (this.isUserValueSet()) {
+    if (this.mUserValue > 0) {
 	    int textSize = (int)(cellSize*3/4);
 	    this.mValuePaint.setTextSize(textSize);
 	    float leftOffset = cellSize/2 - textSize/4;
@@ -333,20 +303,13 @@ public class GridCell {
       // canvas.drawText(this.mCageText, this.mPosX + 2, this.mPosY + 13, this.mCageTextPaint);
     }
     
-    if (mPossibles.size()>0) {
-    	// Small 'possible' values.
-    	this.mPossiblesPaint.setTextSize((int)(cellSize/4.5));
-    	int xOffset = (int) (cellSize/3);
-    	int yOffset = (int) (cellSize/2) + 1;
-    	float xScale = (float) 0.21 * cellSize;
-    	float yScale = (float) 0.21 * cellSize;
-    	for (int i = 0 ; i < mPossibles.size() ; i++) {
-    		int possible = mPossibles.get(i);
-    		float xPos = mPosX + xOffset + ((possible-1)%3)*xScale;
-    		float yPos = mPosY + yOffset + ((int)(possible-1)/3)*yScale;
-       		canvas.drawText(Integer.toString(possible), xPos, yPos, this.mPossiblesPaint);
-    	}
+    this.mPossiblesPaint.setTextSize((int)(cellSize/4));
+    // Small 'possible' values.
+    for (int i = 0 ; i < this.mPossibles.size() ; i++) {
+    	canvas.drawText("" + this.mPossibles.get(i),
+    			this.mPosX + 3 + (8 * i), this.mPosY + cellSize-5,
+    			this.mPossiblesPaint);
     }
   }
-
+  
 }

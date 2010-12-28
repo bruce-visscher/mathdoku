@@ -33,21 +33,23 @@ public class SavedGameList extends ListActivity {
 	}
 	
 	public void DeleteGame(final String filename) {
+		LayoutInflater li = LayoutInflater.from(this);
+        View view = li.inflate(R.layout.deletegame, null); 
 		new AlertDialog.Builder(SavedGameList.this)
-        .setTitle(R.string.save_game_screen_delete_game_confirmation_title)
-        .setMessage(R.string.save_game_screen_delete_game_confirmation_message)
-        .setNegativeButton(R.string.save_game_screen_delete_game_negative_button_label, new DialogInterface.OnClickListener() {
+        .setTitle("Delete Saved Game?")
+        .setView(view)
+        .setNegativeButton("No", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
+                	//
                 }
         })
-        .setPositiveButton(R.string.save_game_screen_delete_game_positive_button_label, new DialogInterface.OnClickListener() {
+        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
             		new File(filename).delete();
             		SavedGameList.this.mAdapter.refreshFiles();
             		SavedGameList.this.mAdapter.notifyDataSetChanged();
                 }
         })
-        .setIcon(android.R.drawable.ic_dialog_alert)
         .show();
 	}
 	

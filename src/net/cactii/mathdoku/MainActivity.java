@@ -1,5 +1,7 @@
 package net.cactii.mathdoku;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,23 +15,24 @@ import android.content.pm.PackageInfo;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.View.OnCreateContextMenuListener;
 import android.view.View.OnTouchListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -37,18 +40,20 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.Animation.AnimationListener;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class MainActivity extends Activity {
     public GridView kenKenGrid;
     TextView solvedText;
-    TextView pressMenu;
+    TextView newGame;
     ProgressDialog mProgressDialog;
     
     LinearLayout topLayout;
-    LinearLayout controls;
+    LinearLayout digitSelector;
     Button digit1;
     Button digit2;
     Button digit3;
@@ -84,12 +89,13 @@ public class MainActivity extends Activity {
         this.kenKenGrid.mContext = this;
         this.solvedText = (TextView)findViewById(R.id.solvedText);
         this.kenKenGrid.animText = this.solvedText;
-        this.pressMenu = (TextView)findViewById(R.id.pressMenu);
-        this.controls = (LinearLayout)findViewById(R.id.controls);
+        this.newGame = (TextView)findViewById(R.id.newGame);
+        this.digitSelector = (LinearLayout)findViewById(R.id.digitSelector);
         this.digit1 = (Button)findViewById(R.id.digitSelect1);
         this.digit2 = (Button)findViewById(R.id.digitSelect2);
         this.digit3 = (Button)findViewById(R.id.digitSelect3);
         this.digit4 = (Button)findViewById(R.id.digitSelect4);
+
         this.digit5 = (Button)findViewById(R.id.digitSelect5);
         this.digit6 = (Button)findViewById(R.id.digitSelect6);
         this.digit7 = (Button)findViewById(R.id.digitSelect7);
@@ -114,7 +120,7 @@ public class MainActivity extends Activity {
         outAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.selectorzoomout);
         outAnimation.setAnimationListener(new AnimationListener() {
             public void onAnimationEnd(Animation animation) {
-              controls.setVisibility(View.GONE);
+              digitSelector.setVisibility(View.GONE);
             }
             public void onAnimationRepeat(Animation animation) {}
             public void onAnimationStart(Animation animation) {}
@@ -123,26 +129,26 @@ public class MainActivity extends Activity {
         this.kenKenGrid.setOnGridTouchListener(this.kenKenGrid.new OnGridTouchListener() {
 			@Override
 			public void gridTouched(GridCell cell) {
-				if (controls.getVisibility() == View.VISIBLE) {
+				if (digitSelector.getVisibility() == View.VISIBLE) {
 					// digitSelector.setVisibility(View.GONE);
 			    	if (MainActivity.this.preferences.getBoolean("hideselector", false)) {
-						controls.startAnimation(outAnimation);
+						digitSelector.startAnimation(outAnimation);
 						//cell.mSelected = false;
 						kenKenGrid.mSelectorShown = false;
 			    	} else {
-						//maybeButton.setChecked((cell.mPossibles.size() > 0));
-						controls.requestFocus();
+						maybeButton.setChecked((cell.mPossibles.size() > 0));
+						digitSelector.requestFocus();
 			    	}
 					kenKenGrid.requestFocus();
 				} else {
 			    	if (MainActivity.this.preferences.getBoolean("hideselector", false)) {
-						controls.setVisibility(View.VISIBLE);
+						digitSelector.setVisibility(View.VISIBLE);
 						Animation animation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.selectorzoomin);
-						controls.startAnimation(animation);
+						digitSelector.startAnimation(animation);
 						kenKenGrid.mSelectorShown = true;
 			    	}
-					//maybeButton.setChecked((cell.mPossibles.size() > 0));
-					controls.requestFocus();
+					maybeButton.setChecked((cell.mPossibles.size() > 0));
+					digitSelector.requestFocus();
 				}
 			}
 		});
@@ -155,9 +161,9 @@ public class MainActivity extends Activity {
     			public void puzzleSolved() {
     				// TODO Auto-generated method stub
     				if (kenKenGrid.mActive)
-    					animText(R.string.main_ui_solved_messsage, 0xFF002F00);
-    				MainActivity.this.controls.setVisibility(View.GONE);
-    				MainActivity.this.pressMenu.setVisibility(View.VISIBLE);
+    					animText("Solved!!", 0xFF002F00);
+    				MainActivity.this.digitSelector.setVisibility(View.GONE);
+    				MainActivity.this.newGame.setVisibility(View.VISIBLE);
     			}
         });
         
@@ -256,7 +262,7 @@ public class MainActivity extends Activity {
 	    this.kenKenGrid.mDupedigits = this.preferences.getBoolean("dupedigits", true);
 	    this.kenKenGrid.mBadMaths = this.preferences.getBoolean("badmaths", true);
 	    if (this.kenKenGrid.mActive && !MainActivity.this.preferences.getBoolean("hideselector", false)) {
-	    	this.controls.setVisibility(View.VISIBLE);
+	    	this.digitSelector.setVisibility(View.VISIBLE);
 	    }
 	    this.setSoundEffectsEnabled(this.preferences.getBoolean("soundeffects", true));
 	    super.onResume();
@@ -282,37 +288,40 @@ public class MainActivity extends Activity {
     }
     
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-    	//Disable or enable solution option depending on whether grid is active
-    	menu.findItem(R.id.solution).setEnabled(kenKenGrid.mActive);
-
-        return super.onPrepareOptionsMenu(menu);
-    }
-    
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.mainmenu, menu);
-        return true;
+    	boolean supRetVal = super.onCreateOptionsMenu(menu);
+    	SubMenu newGame = menu.addSubMenu(4, 0, 0, "New game");
+    	newGame.add("4x4  (easy)");
+    	newGame.add("5x5  (medium)");
+    	newGame.add("6x6  (hard)");
+    	newGame.add("7x7  (harder)");
+    	newGame.add("8x8  (hardest)");
+    	newGame.setIcon(R.drawable.menu_new);
+    	SubMenu load = menu.addSubMenu(0, 1, 0, "Load/Save");
+    	load.setIcon(R.drawable.menu_saveload);
+    	SubMenu solveGame = menu.addSubMenu(1, 2, 0, "Solve");
+    	solveGame.setIcon(R.drawable.menu_solve);
+    	SubMenu options = menu.addSubMenu(3, 3, 0, "Options");
+    	options.setIcon(R.drawable.menu_options);
+    	SubMenu about = menu.addSubMenu(2, 4, 0, "Help");
+    	about.setIcon(R.drawable.menu_help);
+    	return supRetVal;
     }
     
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v,
             ContextMenuInfo menuInfo) {
     	super.onCreateContextMenu(menu, v, menuInfo);
-    	if (!kenKenGrid.mActive)
-    		return;
-    	
-    	menu.add(2, 101, 0, R.string.context_menu_use_cage_maybes); 
+    	menu.add(2, 101, 0, "Use cage 'Maybe's."); 
     	menu.setGroupEnabled(2, false);
-    	menu.add(0, 102, 0,  R.string.context_menu_reveal_cell);
-    	menu.add(1, 103, 0,  R.string.context_menu_clear_cage_cells);
+    	menu.add(0, 102, 0,  "Reveal this cell");
+    	menu.add(1, 103, 0,  "Clear cage values");
     	menu.setGroupEnabled(1, false);
-    	menu.add(0, 104, 0,  R.string.context_menu_clear_grid);
-    	menu.setHeaderTitle(R.string.application_name);
+    	menu.add(0, 104, 0,  "Clear entire grid");
+    	menu.setHeaderTitle("Mathdoku");
 
     	for (GridCell cell : this.kenKenGrid.mCages.get(this.kenKenGrid.mSelectedCell.mCageId).mCells) {
-    		if (cell.isUserValueSet() || cell.mPossibles.size() > 0)
+    		if (cell.mUserValue > 0 || cell.mPossibles.size() > 0)
     			menu.setGroupEnabled(1, true);
     		if (cell.mPossibles.size() == 1)
     			menu.setGroupEnabled(2, true);
@@ -326,7 +335,8 @@ public class MainActivity extends Activity {
     		  if (selectedCell == null)
     			  break;
     		  for (GridCell cell : this.kenKenGrid.mCages.get(selectedCell.mCageId).mCells) {
-    			  cell.clearUserValue();
+    			  cell.mUserValue = 0;
+    			  cell.mPossibles.clear();
     		  }
     		  this.kenKenGrid.invalidate();
     		  break;
@@ -335,7 +345,8 @@ public class MainActivity extends Activity {
     			  break;
     		  for (GridCell cell : this.kenKenGrid.mCages.get(selectedCell.mCageId).mCells) {
     			  if (cell.mPossibles.size() == 1) {
-    				  cell.setUserValue(cell.mPossibles.get(0));
+    				  cell.mUserValue = cell.mPossibles.get(0);
+    				  cell.mPossibles.clear();
     			  }
     		  }
     		  this.kenKenGrid.invalidate();
@@ -343,9 +354,10 @@ public class MainActivity extends Activity {
     	  case 102: // Reveal cell
     		  if (selectedCell == null)
     			  break;
-    		  selectedCell.setUserValue(selectedCell.mValue);
+    		  selectedCell.mPossibles.clear();
+    		  selectedCell.mUserValue = selectedCell.mValue;
     		  selectedCell.mCheated = true;
-    		  Toast.makeText(this, R.string.main_ui_cheat_messsage, Toast.LENGTH_SHORT).show();
+    		  Toast.makeText(this, "Cheat! :P", Toast.LENGTH_SHORT).show();
     		  this.kenKenGrid.invalidate();
     		  break;
     	  case 104: // Clear grid
@@ -357,54 +369,42 @@ public class MainActivity extends Activity {
     
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
+    	boolean supRetVal = super.onOptionsItemSelected(menuItem);
+    	String title = (String) menuItem.getTitle();
     	switch (menuItem.getItemId()) {
-   		case R.id.size4:
-   			this.startNewGame(4);
-   			return true;
-   		case R.id.size5:
-   			this.startNewGame(5);
-   			return true;
-   		case R.id.size6:
-   			this.startNewGame(6);
-   			return true;
-   		case R.id.size7:
-   			this.startNewGame(7);
-   			return true;
-   		case R.id.size8:
-   			this.startNewGame(8);
-   			return true;
-   		case R.id.saveload:
-            Intent i = new Intent(this, SavedGameList.class);
-            startActivityForResult(i, 7);
-	        return true;
-   		case R.id.checkprogress:
-   			int textId;
-   			if (kenKenGrid.isSolutionValidSoFar())
-   				textId = R.string.ProgressOK;
-			else {
-				textId = R.string.ProgressBad;
-				kenKenGrid.markInvalidChoices();
-			}
-   			Toast toast = Toast.makeText(getApplicationContext(),
-   									 	 textId,
-   									 	 Toast.LENGTH_SHORT);
-   			toast.setGravity(Gravity.CENTER,0,0);
-   			toast.show();
-   			return true;
-   		case R.id.showsolution:
-   			this.kenKenGrid.Solve();
-    		this.pressMenu.setVisibility(View.VISIBLE);
-    		return true;
-   		case R.id.options:
-            startActivityForResult(new Intent(
-	                MainActivity.this, OptionsActivity.class), 0);  
-            return true;
-   		case R.id.help:
-    		this.openHelpDialog();
-    		return true;
-   	    default:
-   	        return super.onOptionsItemSelected(menuItem);
-   	    }
+	    	case 0 :
+	    		if (title.startsWith("4x4"))
+	    			this.kenKenGrid.mGridSize = 4;
+	    		else if (title.startsWith("5x5"))
+	    			this.kenKenGrid.mGridSize = 5;
+	    		else if (title.startsWith("6x6"))
+	    			this.kenKenGrid.mGridSize = 6;
+	    		else if (title.startsWith("7x7"))
+	    			this.kenKenGrid.mGridSize = 7;
+	    		else if (title.startsWith("8x8"))
+	    			this.kenKenGrid.mGridSize = 8;
+	    		else
+	    			break;
+				this.startNewGame(this.kenKenGrid.mGridSize);
+				break;
+	    	case 2:
+	    		if (this.kenKenGrid.mActive)
+	    			this.kenKenGrid.Solve();
+	    		this.newGame.setVisibility(View.VISIBLE);
+	    		break;
+	        case 3 :
+	            startActivityForResult(new Intent(
+	                MainActivity.this, OptionsActivity.class), 0);
+	            break;
+	    	case 4:
+	    		this.openHelpDialog();
+	    		break;
+	    	case 1:
+	            Intent i = new Intent(this, SavedGameList.class);
+	            startActivityForResult(i, 7);
+		            break;
+    	}
+    	return supRetVal;
     }
     
     
@@ -412,7 +412,7 @@ public class MainActivity extends Activity {
       if (event.getAction() == KeyEvent.ACTION_DOWN &&
     	  keyCode == KeyEvent.KEYCODE_BACK &&
     	  this.kenKenGrid.mSelectorShown) {
-      	this.controls.setVisibility(View.GONE);
+      	this.digitSelector.setVisibility(View.GONE);
     	this.kenKenGrid.requestFocus();
     	this.kenKenGrid.mSelectorShown = false;
     	this.kenKenGrid.invalidate();
@@ -455,23 +455,18 @@ public class MainActivity extends Activity {
     	}
     	if (this.kenKenGrid.mSelectedCell == null)
     		return;
-    	if (value == 0) {	// Clear Button
-			this.kenKenGrid.mSelectedCell.mPossibles.clear();
-    		this.kenKenGrid.mSelectedCell.setUserValue(0);
-    	}
-    	else {
-        	if (this.maybeButton.isChecked()) {
-        		if (kenKenGrid.mSelectedCell.isUserValueSet())
-            		this.kenKenGrid.mSelectedCell.clearUserValue();
-    			this.kenKenGrid.mSelectedCell.togglePossible(value);
-        	}
-        	else {
-        		this.kenKenGrid.mSelectedCell.setUserValue(value);
+    	if (this.maybeButton.isChecked())
+    		if (value == 0) {
     			this.kenKenGrid.mSelectedCell.mPossibles.clear();
-        	}
+				this.maybeButton.setChecked(false);
+    		} else
+    			this.kenKenGrid.mSelectedCell.togglePossible(value);
+    	else {
+    		this.kenKenGrid.mSelectedCell.setUserValue(value);
+    		this.kenKenGrid.mSelectedCell.mPossibles.clear();
     	}
     	if (this.preferences.getBoolean("hideselector", false))
-    		this.controls.setVisibility(View.GONE);
+    		this.digitSelector.setVisibility(View.GONE);
     	// this.kenKenGrid.mSelectedCell.mSelected = false;
     	this.kenKenGrid.requestFocus();
     	this.kenKenGrid.mSelectorShown = false;
@@ -492,13 +487,12 @@ public class MainActivity extends Activity {
     	    	MainActivity.this.topLayout.setBackgroundResource(R.drawable.background);
     	    	MainActivity.this.kenKenGrid.setTheme(GridView.THEME_CARVED);
     	    }
-        	MainActivity.this.setButtonVisibility(kenKenGrid.mGridSize);
         	MainActivity.this.kenKenGrid.invalidate();
         }
     };
     
     public void startNewGame(int gridSize) {
-    	kenKenGrid.mGridSize = gridSize;
+    	this.setButtonVisibility(kenKenGrid.mGridSize);
     	showDialog(0);
 
     	Thread t = new Thread() {
@@ -513,9 +507,8 @@ public class MainActivity extends Activity {
     @Override
     protected Dialog onCreateDialog(int id) {
 	    mProgressDialog = new ProgressDialog(this);
-	    mProgressDialog.setTitle(R.string.main_ui_building_puzzle_title);
-	    mProgressDialog.setMessage(getResources().getString(R.string.main_ui_building_puzzle_message));
-	    mProgressDialog.setIcon(android.R.drawable.ic_dialog_info);
+	    mProgressDialog.setTitle("Building puzzle");
+	    mProgressDialog.setMessage("Please wait...");
 	    mProgressDialog.setIndeterminate(false);
 	    mProgressDialog.setCancelable(false);
 	    return mProgressDialog;
@@ -555,14 +548,14 @@ public class MainActivity extends Activity {
             break; 
         }
 		this.solvedText.setVisibility(View.GONE);
-		this.pressMenu.setVisibility(View.GONE);
+		this.newGame.setVisibility(View.GONE);
     	if (!MainActivity.this.preferences.getBoolean("hideselector", false)) {
-			this.controls.setVisibility(View.VISIBLE);
+			this.digitSelector.setVisibility(View.VISIBLE);
     	}
     }
     
-    private void animText(int textIdentifier, int color) {
-  	  this.solvedText.setText(textIdentifier);
+    private void animText(String text, int color) {
+  	    this.solvedText.setText(text);
   	  this.solvedText.setTextColor(color);
   	  this.solvedText.setVisibility(View.VISIBLE);
   	    final float SCALE_FROM = (float) 0;
@@ -577,19 +570,18 @@ public class MainActivity extends Activity {
     private void openHelpDialog() {
         LayoutInflater li = LayoutInflater.from(this);
         View view = li.inflate(R.layout.aboutview, null); 
-        TextView tv = (TextView)view.findViewById(R.id.aboutVersionCode);
-        tv.setText(getVersionName());
         new AlertDialog.Builder(MainActivity.this)
-        .setTitle(getResources().getString(R.string.application_name) + " " + getResources().getString(R.string.menu_help))
+        .setTitle("Mathdoku Help")
         .setIcon(R.drawable.about)
         .setView(view)
-        .setNeutralButton(R.string.menu_changes, new DialogInterface.OnClickListener() {
+        .setNeutralButton("Changes", new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int whichButton) {
               MainActivity.this.openChangesDialog();
           }
         })
-        .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+        .setNegativeButton("Close", new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int whichButton) {
+              //
           }
         })
         .show();  
@@ -599,10 +591,10 @@ public class MainActivity extends Activity {
       LayoutInflater li = LayoutInflater.from(this);
       View view = li.inflate(R.layout.changeview, null); 
       new AlertDialog.Builder(MainActivity.this)
-      .setTitle(R.string.changelog_title)
+      .setTitle("Changelog")
       .setIcon(R.drawable.about)
       .setView(view)
-      .setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+      .setNegativeButton("Close", new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int whichButton) {
             //
         }
@@ -611,16 +603,17 @@ public class MainActivity extends Activity {
     }
     
     private void openClearDialog() {
+        LayoutInflater li = LayoutInflater.from(this);
+        View view = li.inflate(R.layout.clearview, null); 
         new AlertDialog.Builder(MainActivity.this)
-        .setTitle(R.string.context_menu_clear_grid_confirmation_title)
-        .setMessage(R.string.context_menu_clear_grid_confirmation_message)
-        .setIcon(android.R.drawable.ic_dialog_alert)
-        .setNegativeButton(R.string.context_menu_clear_grid_negative_button_label, new DialogInterface.OnClickListener() {
+        .setTitle("Clear All?")
+        .setView(view)
+        .setNegativeButton("No", new DialogInterface.OnClickListener() {
           public void onClick(DialogInterface dialog, int whichButton) {
               //
           }
         })
-        .setPositiveButton(R.string.context_menu_clear_grid_positive_button_label, new DialogInterface.OnClickListener() {
+        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				MainActivity.this.kenKenGrid.clearUserValues();
@@ -654,16 +647,5 @@ public class MainActivity extends Activity {
               Log.e("Mathdoku", "Package name not found", e);
           }
           return version;
-      }
-    
-    public String getVersionName() {
-        String versionname = "";
-          try {
-              PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
-              versionname = pi.versionName;
-          } catch (Exception e) {
-              Log.e("Mathdoku", "Package name not found", e);
-          }
-          return versionname;
       }
 }

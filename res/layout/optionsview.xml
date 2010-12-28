@@ -1,36 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen  
     xmlns:android="http://schemas.android.com/apk/res/android">  
-	<PreferenceCategory android:title="@string/menu_options">
+	<PreferenceCategory android:title="General options">
 		<CheckBoxPreference
 			android:key="alternatetheme"
-			android:title="@string/option_alternate_theme_title"
-			android:summary="@string/option_alternate_theme_summary"
+			android:title="Alternate theme"
+			android:summary="Use a different theme"
 			android:defaultValue="true" />
 		<CheckBoxPreference
 			android:key="hideselector"
-			android:title="@string/option_hide_selector_title"
-			android:summary="@string/option_hide_selector_summary"
+			android:title="Auto-hide selector"
+			android:summary="Selector buttons hide after pressing"
 			android:defaultValue="false" />
 		<CheckBoxPreference
 			android:key="badmaths"
-			android:title="@string/option_mark_bad_maths_title"
-			android:summary="@string/option_mark_bad_maths_summary"
+			android:title="Show bad maths"
+			android:summary="Highlight invalid arithmetic"
 			android:defaultValue="true" />
 		<CheckBoxPreference
 			android:key="dupedigits"
-			android:title="@string/option_mark_duplicates_title"
-			android:summary="@string/option_mark_duplicates_summary"
+			android:title="Mark duplicates"
+			android:summary="Highlight duplicate digits"
 			android:defaultValue="true" />
 		<CheckBoxPreference
 			android:key="soundeffects"
-			android:title="@string/option_sound_effects_title"
-			android:summary="@string/option_sound_effects_summary"
+			android:title="Enable sound effects"
 			android:defaultValue="true" />
 		<CheckBoxPreference
 			android:key="wakelock"
-			android:title="@string/option_wake_lock_title"
-			android:summary="@string/option_wake_lock_summary"
+			android:title="Keep screen on"
 			android:defaultValue="true" />
 	</PreferenceCategory>
 

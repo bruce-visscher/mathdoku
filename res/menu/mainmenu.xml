@@ -5,32 +5,24 @@
           android:title="@string/menu_newgame" >
         <menu>
             <item android:id="@+id/size4"
-                  android:title="@string/grid_size_4" />
+                  android:title="@string/menu_size4" />
             <item android:id="@+id/size5"
-                  android:title="@string/grid_size_5" />
+                  android:title="@string/menu_size5" />
             <item android:id="@+id/size6"
-                  android:title="@string/grid_size_6" />
+                  android:title="@string/menu_size6" />
             <item android:id="@+id/size7"
-                  android:title="@string/grid_size_7" />
+                  android:title="@string/menu_size7" />
             <item android:id="@+id/size8"
-                  android:title="@string/grid_size_8" />
+                  android:title="@string/menu_size8" />
         </menu>
     </item>
 	<item android:title="@string/menu_saveload"
 	  	  android:id="@+id/saveload"
 	  	  android:icon="@drawable/menu_saveload">
 	</item>
-	<item android:id="@+id/solution"
-		  android:title="@string/menu_solution"
+	<item android:id="@+id/solve"
+		  android:title="@string/menu_solve"
 		  android:icon="@drawable/menu_solve">
-		<menu>
-			<item android:title="@string/menu_checkprogress"
-				  android:id="@+id/checkprogress">
-			</item>
-			<item android:title="@string/menu_showsolution"
-				  android:id="@+id/showsolution">
-			</item>
-		</menu>
 	</item>
 	<item android:id="@+id/options"
 	  	  android:icon="@drawable/menu_options"

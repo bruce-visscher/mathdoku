@@ -251,31 +251,31 @@ public class GridCage {
   // Returns whether the cage is solved (with mUserValue)
   public boolean isSolved() {
 	  if (this.mCells.size() == 1)
-		  return (this.mCells.get(0).mValue == this.mCells.get(0).getUserValue());
+		  return (this.mCells.get(0).mValue == this.mCells.get(0).mUserValue);
 	  
 	  switch (this.mAction) {
 		  case ACTION_ADD :
 			  int total = 0;
 			  for (GridCell cell : this.mCells) {
-				  total += cell.getUserValue();
+				  total += cell.mUserValue;
 			  }
 			  return (total == this.mResult);
 		  case ACTION_MULTIPLY :
 			  int mtotal = 1;
 			  for (GridCell cell : this.mCells) {
-				  mtotal *= cell.getUserValue();
+				  mtotal *= cell.mUserValue;
 			  }
 			  return (mtotal == this.mResult);
 		  case ACTION_DIVIDE :
-			  if (this.mCells.get(0).getUserValue() > this.mCells.get(1).getUserValue())
-				  return ((this.mCells.get(0).getUserValue() / this.mCells.get(1).getUserValue()) == this.mResult);
+			  if (this.mCells.get(0).mUserValue > this.mCells.get(1).mUserValue)
+				  return ((this.mCells.get(0).mUserValue / this.mCells.get(1).mUserValue) == this.mResult);
 			  else
-				  return ((this.mCells.get(1).getUserValue() / this.mCells.get(0).getUserValue()) == this.mResult);
+				  return ((this.mCells.get(1).mUserValue / this.mCells.get(0).mUserValue) == this.mResult);
 		  case ACTION_SUBTRACT :
-			  if (this.mCells.get(0).getUserValue() > this.mCells.get(1).getUserValue())
-				  return ((this.mCells.get(0).getUserValue() - this.mCells.get(1).getUserValue()) == this.mResult);
+			  if (this.mCells.get(0).mUserValue > this.mCells.get(1).mUserValue)
+				  return ((this.mCells.get(0).mUserValue - this.mCells.get(1).mUserValue) == this.mResult);
 			  else
-				  return ((this.mCells.get(1).getUserValue() - this.mCells.get(0).getUserValue()) == this.mResult);
+				  return ((this.mCells.get(1).mUserValue - this.mCells.get(0).mUserValue) == this.mResult);
 	  }
 	  throw new RuntimeException("isSolved() got to an unreachable point " + this.mAction + ": " + this.toString());
   }
@@ -287,7 +287,7 @@ public class GridCage {
   public void userValuesCorrect() {
     this.mUserMathCorrect = true;
     for (GridCell cell : this.mCells)
-      if (!cell.isUserValueSet()) {
+      if (cell.mUserValue < 1) {
         this.setBorders();
         return;
       }

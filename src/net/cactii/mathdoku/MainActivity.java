@@ -581,6 +581,7 @@ public class MainActivity extends Activity implements
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		mBlockTouchSameCell = true;
+		super.onCreateContextMenu(menu, v, menuInfo);
 		if (mGrid == null || !mGrid.isActive()) {
 			// No context menu in case puzzle isn't active.
 			return;
@@ -648,8 +649,6 @@ public class MainActivity extends Activity implements
 		// Option: show the solution for this puzzle
 		menu.add(3, CONTEXT_MENU_SHOW_SOLUTION, 0,
 				R.string.context_menu_show_solution);
-		
-		super.onCreateContextMenu(menu, v, menuInfo);
 	}
 
 	public boolean onContextItemSelected(MenuItem item) {
@@ -1199,9 +1198,8 @@ public class MainActivity extends Activity implements
 		}
 		if (previousInstalledVersion < 259 && currentVersion >= 259) {
 			if (!mPreferences.contains(PREF_USAGE_LOG_STATUS)) {
-				prefeditor.putString(PREF_USAGE_LOG_STATUS, UsageLog
-						.getInstance()
-						.getInitialValuePreferenceUsageLogStatus());
+				prefeditor.putString(PREF_USAGE_LOG_STATUS,
+						UsageLog.getInstance().getInitialValuePreferenceUsageLogStatus());
 			}
 			if (!mPreferences.contains(PREF_USAGE_LOG_COUNT_GAMES_STARTED)) {
 				prefeditor.putInt(PREF_USAGE_LOG_COUNT_GAMES_STARTED,
@@ -1309,11 +1307,6 @@ public class MainActivity extends Activity implements
 					if (newGrid != null) {
 						mGrid = newGrid;
 						mGridView.loadNewGrid(mGrid);
-						if (mGrid.isActive()) {
-							// As this grid can contain maybe value we have to
-							// set the corresponding digit position grid.
-							setDigitPositionGrid(InputMode.NORMAL);
-						}
 						mPuzzleGridLayout.setVisibility(View.INVISIBLE);
 						mControls.setVisibility(View.GONE);
 						mStartButton.setVisibility(View.GONE);
@@ -1586,11 +1579,6 @@ public class MainActivity extends Activity implements
 			}
 			mControls.setVisibility(View.GONE);
 			mStartButton.setVisibility(View.VISIBLE);
-
-			// Determine the layout to be used for maybe values inside a grid
-			if (mGrid != null) {
-				setDigitPositionGrid(inputMode);
-			}
 			break;
 		case NORMAL:
 		case MAYBE:
@@ -1618,64 +1606,53 @@ public class MainActivity extends Activity implements
 									(inputMode == InputMode.NORMAL ? R.string.input_mode_normal_long
 											: R.string.input_mode_maybe_long)));
 
-			// Determine the layout to be used for the digit buttons and maybe values inside a grid
+			// Determine which buttons to show on what positions
 			if (mGrid != null) {
-				setDigitPositionGrid(inputMode);
+				// Create the mapping for mDigitPosition on the correct button
+				// grid layout.
+				DigitPositionGridType digitPositionGridType = DigitPositionGridType.GRID_3X3;
+				if (getResources().getString(R.string.dimension).equals(
+						"small-port")) {
+					digitPositionGridType = DigitPositionGridType.GRID_2X5;
+				}
+				DigitPositionGrid digitPositionGrid = new DigitPositionGrid(
+						digitPositionGridType, mGrid.getGridSize());
+
+				// Use the created mapping to fill all digit positions.
+				for (int i = 0; i < mDigitPosition.length; i++) {
+					int value = digitPositionGrid.getValue(i);
+					mDigitPosition[i].setText(value > 0 ? Integer
+							.toString(value) : "");
+					mDigitPosition[i].setVisibility(digitPositionGrid
+							.getVisibility(i));
+					mDigitPosition[i].setTextColor(color);
+				}
+				if (digitPositionGridType == DigitPositionGridType.GRID_2X5) {
+					// This layout also has a buttonposition10 which is never
+					// used to put a button there. However for a correct layout
+					// of the buttons the visibility has to be set correctly.
+					View view = findViewById(R.id.digitSelect10);
+					if (view != null) {
+						view.setVisibility(digitPositionGrid.getVisibility(9));
+					}
+				}
+
+				// The weight of the input mode has to be aligned with the
+				// number of columns containing digit buttons.
+				TableRow.LayoutParams layoutParams = (TableRow.LayoutParams) mInputModeTextView
+						.getLayoutParams();
+				layoutParams.weight = digitPositionGrid
+						.countVisibleDigitColumns();
+				mInputModeTextView.setLayoutParams(layoutParams);
+
+				// Store mapping in the grid view so it can be reused when
+				// drawing the cells.
+				mGridView.setDigitPositionGrid(digitPositionGrid);
 			}
 			break;
 		}
 
 		mGridView.invalidate();
-	}
-
-	/**
-	 * Set the digit position grid for layout the digit buttons and maybe values.
-	 * 
-	 * @param inputMode
-	 *            The new input mode to be set.
-	 */
-	private void setDigitPositionGrid(InputMode inputMode) {
-		// Determine the color which is used for text which depends on the
-		// actual input mode
-		int color = (inputMode == InputMode.NORMAL ? mPainter.mHighlightedTextColorNormalInputMode
-				: mPainter.mHighlightedTextColorMaybeInputMode);
-
-		// Create the mapping for mDigitPosition on the correct button
-		// grid layout.
-		DigitPositionGridType digitPositionGridType = DigitPositionGridType.GRID_3X3;
-		if (getResources().getString(R.string.dimension).equals("small-port")) {
-			digitPositionGridType = DigitPositionGridType.GRID_2X5;
-		}
-		DigitPositionGrid digitPositionGrid = new DigitPositionGrid(
-				digitPositionGridType, mGrid.getGridSize());
-
-		// Use the created mapping to fill all digit positions.
-		for (int i = 0; i < mDigitPosition.length; i++) {
-			int value = digitPositionGrid.getValue(i);
-			mDigitPosition[i].setText(value > 0 ? Integer.toString(value) : "");
-			mDigitPosition[i].setVisibility(digitPositionGrid.getVisibility(i));
-			mDigitPosition[i].setTextColor(color);
-		}
-		if (digitPositionGridType == DigitPositionGridType.GRID_2X5) {
-			// This layout also has a buttonposition10 which is never
-			// used to put a button there. However for a correct layout
-			// of the buttons the visibility has to be set correctly.
-			View view = findViewById(R.id.digitSelect10);
-			if (view != null) {
-				view.setVisibility(digitPositionGrid.getVisibility(9));
-			}
-		}
-
-		// The weight of the input mode has to be aligned with the
-		// number of columns containing digit buttons.
-		TableRow.LayoutParams layoutParams = (TableRow.LayoutParams) mInputModeTextView
-				.getLayoutParams();
-		layoutParams.weight = digitPositionGrid.countVisibleDigitColumns();
-		mInputModeTextView.setLayoutParams(layoutParams);
-
-		// Store mapping in the grid view so it can be reused when
-		// drawing the cells.
-		mGridView.setDigitPositionGrid(digitPositionGrid);
 	}
 
 	/**

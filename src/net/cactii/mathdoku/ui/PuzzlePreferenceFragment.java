@@ -23,7 +23,7 @@ public class PuzzlePreferenceFragment extends PreferenceFragment implements
 
 		setThemeSummary();
 
-		// Build list preference
+		// Build list preferences
 		ListPreference listPreference = (ListPreference) findPreference(Preferences.PUZZLE_SETTING_OUTER_SWIPE_CIRCLE);
 		String[] entries = new String[7];
 		String[] entryValues = new String[7];
@@ -69,6 +69,16 @@ public class PuzzlePreferenceFragment extends PreferenceFragment implements
 		if (key.equals(Preferences.PUZZLE_SETTING_OUTER_SWIPE_CIRCLE)) {
 			setOuterSwipeCircleSummary();
 		}
+		if (key.equals(Preferences.PUZZLE_SETTING_DIGIT_INPUT_TYPE)) {
+			setSwipeOptions();
+		}
+	}
+	
+	/*
+	 * Disable or enable other swipe options depending on input type setting.
+	 */
+	private void setSwipeOptions() {
+		findPreference(Preferences.PUZZLE_SETTING_OUTER_SWIPE_CIRCLE).setEnabled(mPreferences.isSwipeCircleVisible());
 	}
 
 	/**

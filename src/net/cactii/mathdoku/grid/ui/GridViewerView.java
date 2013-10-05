@@ -187,7 +187,11 @@ public class GridViewerView extends View {
 
 			// The grid border needs to be at least 50% of a normal cell in
 			// order to display the swipe border entirely.
-			mBorderWidth = mGridCellSize / 2;
+			if (mPreferences.isSwipeCircleVisible()) {
+				mBorderWidth = mGridCellSize / 2;
+			} else {
+				mBorderWidth = 1; // minimal
+			}
 
 		} else {
 			// Force to compute the cell size

@@ -33,6 +33,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,6 +43,7 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TableLayout;
@@ -85,7 +87,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	private Button mDigit7;
 	private Button mDigit8;
 	private Button mDigit9;
-	private Button mDigitC;
+	private ImageButton mDigitC;
 	
 	private Button mClearButton;
 	private Button mUndoButton;
@@ -164,7 +166,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		mDigit8.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit9 = (Button)mRootView.findViewById(R.id.digit9);
 		mDigit9.setBackgroundColor(mPainter.getButtonBackgroundColor());
-		mDigitC = (Button)mRootView.findViewById(R.id.digitC);
+		mDigitC = (ImageButton)mRootView.findViewById(R.id.digitC);
 		mDigitC.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		
 		mClearButton = (Button) mRootView.findViewById(R.id.clearButton);
@@ -615,9 +617,12 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mDigit9.invalidate();
 			mDigitC.invalidate();
 			mButtonsTableLayout.invalidate();
+			mUndoButton.setVisibility(View.GONE);
+			mClearButton.setVisibility(View.GONE);
 		} else {
 			mButtonsTableLayout.setVisibility(View.GONE);
 			mTickerTape.setDisabled(false);
+			setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
 		}
 	}
 	
@@ -701,7 +706,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		if (key.equals(Preferences.PUZZLE_SETTING_THEME)) {
 			setTheme();
 		}
-		if (key.equals(Preferences.DIGIT_BUTTONS_VISIBLE)) {
+		if (key.equals(Preferences.PUZZLE_SETTING_DIGIT_INPUT_TYPE)) {
 			setDigitButtons();
 		}
 	}
@@ -879,17 +884,21 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	 *            should be visible. Use null in case no cell is selected.
 	 */
 	private void setClearAndUndoButtonVisibility(GridCell cell) {
+		boolean hideButtons = mMathDokuPreferences.isDigitButtonsVisible();
 		if (mClearButton != null) {
-			mClearButton
-					.setVisibility((cell == null || cell.isEmpty()) ? View.INVISIBLE
-							: View.VISIBLE);
+			if (hideButtons || cell == null || cell.isEmpty()) {
+				mClearButton.setVisibility(View.INVISIBLE);
+			} else {
+				mClearButton.setVisibility(View.VISIBLE);
+			}
 			mClearButton.invalidate();
 		}
 		if (mUndoButton != null) {
-			mUndoButton
-					.setVisibility((mGrid == null || mGrid.countMoves() == 0 || mGrid
-							.isActive() == false) ? View.INVISIBLE
-							: View.VISIBLE);
+			if (hideButtons || mGrid == null || mGrid.countMoves() == 0 || mGrid.isActive() == false) {
+				mUndoButton.setVisibility(View.INVISIBLE);
+			} else {
+				mUndoButton.setVisibility(View.VISIBLE);
+			}
 			mUndoButton.invalidate();
 		}
 	}

@@ -3,6 +3,7 @@ package net.cactii.mathdoku.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import net.cactii.mathdoku.Preferences;
 import net.cactii.mathdoku.R;
 import net.cactii.mathdoku.developmentHelper.DevelopmentHelper;
 import net.cactii.mathdoku.developmentHelper.DevelopmentHelper.Mode;
@@ -27,6 +28,7 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,12 +36,14 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -180,8 +184,36 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 			replayPuzzle(mOnResumeReplaySolvingAttempt);
 			mOnResumeReplaySolvingAttempt = -1;
 		}
+		// For low DPI devices, when digit buttons are enabled, hide the action bar and
+		// force portrait.
+		final ActionBar actionBar = getActionBar();
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
+		if (actionBar != null && metrics.densityDpi < 240) {
+			Preferences prefs = Preferences.getInstance();
+			if (prefs.isDigitButtonsVisible()) {
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				actionBar.hide();
+			} else {
+				actionBar.show();
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			}
+		}
 		super.onResume();
+	}
+	
+	/*
+	 * Override back button to act as an undo button.
+	 */
+	@Override
+	public void onBackPressed() {
+		if (mPuzzleFragment != null && mPuzzleFragment.mGrid != null) {
+			if (mPuzzleFragment.mGrid.undoLastMove()) {
+				mPuzzleFragment.mGridPlayerView.invalidate();
+				invalidateOptionsMenu();
+			}
+		}
 	}
 
 	@Override

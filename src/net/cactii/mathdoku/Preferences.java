@@ -75,12 +75,15 @@ public class Preferences {
 
 	public final static String PUZZLE_SETTING_COLORED_DIGITS = "puzzle_setting_colored_digits";
 	public final static boolean PUZZLE_SETTING_COLORED_DIGITS_DEFAULT = true;
+	
+	public final static String PUZZLE_SETTING_DIGIT_INPUT_TYPE = "puzzle_setting_input_type";
+	public final static String PUZZLE_SETTING_DIGIT_INPUT_TYPE_DEFAULT = "0";
 
 	public final static String PUZZLE_SETTING_DUPLICATE_DIGITS_VISIBLE = "puzzle_setting_duplicate_digits_visible";
 	public final static boolean PUZZLE_SETTING_DUPLICATE_DIGITS_VISIBLE_DEFAULT = true;
 
 	public final static String PUZZLE_SETTING_FULL_SCREEN = "puzzle_setting_full_screen";
-	public final static boolean PUZZLE_SETTING_FULL_SCREEN_DEFAULT = false;
+	public final static boolean PUZZLE_SETTING_FULL_SCREEN_DEFAULT = true;
 
 	public final static String PUZZLE_SETTING_MAYBES_DISPLAYED_IN_GRID = "puzzle_setting_maybes_displayed_in_grid";
 	public final static boolean PUZZLE_SETTING_MAYBES_DISPLAYED_IN_GRID_DEFAULT = true;
@@ -117,9 +120,6 @@ public class Preferences {
 
 	public final static String STATISTICS_TAB_LAST_SHOWED = "statistics_tab_last_showed";
 	public final static int STATISTICS_TAB_LAST_SHOWED_DEFAULT = -1;
-
-	public final static String DIGIT_BUTTONS_VISIBLE = "puzzle_setting_digit_buttons";
-	public final static boolean DIGIT_BUTTONS_VISIBLE_DEFAULT = true;
 	
 	// Swipe counters
 	public final static String SWIPE_INVALID_MOTION_COUNTER = "swipe_invalid_motion_counter";
@@ -321,8 +321,8 @@ public class Preferences {
 					STATISTICS_TAB_LAST_SHOWED_DEFAULT);
 			prefeditor.putString(PUZZLE_SETTING_OUTER_SWIPE_CIRCLE,
 					PUZZLE_SETTING_OUTER_SWIPE_CIRCLE_DEFAULT);
-			prefeditor.putBoolean(DIGIT_BUTTONS_VISIBLE,
-					DIGIT_BUTTONS_VISIBLE_DEFAULT);
+			prefeditor.putString(PUZZLE_SETTING_DIGIT_INPUT_TYPE,
+					PUZZLE_SETTING_DIGIT_INPUT_TYPE_DEFAULT);
 		}
 
 		// Save
@@ -394,10 +394,18 @@ public class Preferences {
 	 * Whether digit buttons are used.
 	 */
 	public boolean isDigitButtonsVisible() {
-		return mSharedPreferences.getBoolean(DIGIT_BUTTONS_VISIBLE,
-				DIGIT_BUTTONS_VISIBLE_DEFAULT);
+		return ! "2".equals(mSharedPreferences.getString(PUZZLE_SETTING_DIGIT_INPUT_TYPE,
+				PUZZLE_SETTING_DIGIT_INPUT_TYPE_DEFAULT));
 	}
 
+	/**
+	 * Whether swipe circle used.
+	 */
+	public boolean isSwipeCircleVisible() {
+		return ! "1".equals(mSharedPreferences.getString(PUZZLE_SETTING_DIGIT_INPUT_TYPE,
+				PUZZLE_SETTING_DIGIT_INPUT_TYPE_DEFAULT));
+	}
+	
 	/**
 	 * Checks whether the sounds effects are enabled.
 	 * 

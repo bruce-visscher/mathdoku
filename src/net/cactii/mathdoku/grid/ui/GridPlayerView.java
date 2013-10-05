@@ -116,7 +116,7 @@ public class GridPlayerView extends GridViewerView implements OnTouchListener {
 				new Handler().postDelayed(new Runnable() {
 					@Override
 					public void run() {
-						if (mSwipeMotion != null) {
+						if (mSwipeMotion != null && mPreferences.isSwipeCircleVisible()) {
 							mSwipeMotion.setVisible(true);
 						}
 						invalidate();
@@ -176,7 +176,7 @@ public class GridPlayerView extends GridViewerView implements OnTouchListener {
 			}
 			return true;
 		case MotionEvent.ACTION_MOVE:
-			if (mSwipeMotion != null) {
+			if (mSwipeMotion != null && mPreferences.isSwipeCircleVisible()) {
 				// Update current swipe position
 				mSwipeMotion.update(event);
 

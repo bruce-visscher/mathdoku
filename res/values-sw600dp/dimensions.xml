@@ -22,9 +22,8 @@
 
     <!-- CONTROLS AND SUB ELEMENTS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-
     <!-- The text size used for text on non-digit buttons. -->
-    <dimen name="controls_text_size_default">30sp</dimen>
+    <dimen name="controls_text_size_default">48sp</dimen>
 
     <!-- DIALOGS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 

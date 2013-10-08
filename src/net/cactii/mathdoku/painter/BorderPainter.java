@@ -5,10 +5,10 @@ import android.graphics.Paint;
 abstract class BorderPainter extends BasePainter {
 	// Border sizes
 	protected final static int BORDER_STROKE_HAIR_LINE = 0;
-	protected final static int BORDER_STROKE_WIDTH_THIN = 1;
-	protected final static int BORDER_STROKE_WIDTH_NORMAL = 2;
-	protected final static int BORDER_STROKE_WIDTH_MEDIUM = 3;
-	protected final static int BORDER_STROKE_WIDTH_THICK = 4;
+	protected final static int BORDER_STROKE_WIDTH_THIN = 2;
+	protected final static int BORDER_STROKE_WIDTH_NORMAL = 3;
+	protected final static int BORDER_STROKE_WIDTH_MEDIUM = 4;
+	protected final static int BORDER_STROKE_WIDTH_THICK = 5;
 
 	// Common properties for all derived painter classes
 	protected Paint mBorderPaint;

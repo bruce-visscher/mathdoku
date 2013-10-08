@@ -184,13 +184,13 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 			replayPuzzle(mOnResumeReplaySolvingAttempt);
 			mOnResumeReplaySolvingAttempt = -1;
 		}
-		// For low DPI devices, when digit buttons are enabled, hide the action bar and
+		// For small screens, when digit buttons are enabled, hide the action bar and
 		// force portrait.
 		final ActionBar actionBar = getActionBar();
 		DisplayMetrics metrics = new DisplayMetrics();
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-		if (actionBar != null && metrics.densityDpi < 240) {
+		float smallest = Math.min(metrics.widthPixels, metrics.heightPixels);
+		if (actionBar != null && smallest < 480) {
 			Preferences prefs = Preferences.getInstance();
 			if (prefs.isDigitButtonsVisible()) {
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -208,11 +208,13 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 	 */
 	@Override
 	public void onBackPressed() {
-		if (mPuzzleFragment != null && mPuzzleFragment.mGrid != null) {
+		if (mPuzzleFragment != null && mPuzzleFragment.mGrid != null && mPuzzleFragment.isActive()) {
 			if (mPuzzleFragment.mGrid.undoLastMove()) {
 				mPuzzleFragment.mGridPlayerView.invalidate();
 				invalidateOptionsMenu();
 			}
+		} else {
+			super.onBackPressed();
 		}
 	}
 

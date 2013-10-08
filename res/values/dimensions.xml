@@ -23,7 +23,7 @@
     <!-- CONTROLS AND SUB ELEMENTS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
     <!-- The text size used for text on buttons. -->
-    <dimen name="controls_text_size_default">28sp</dimen>
+    <dimen name="controls_text_size_default">30sp</dimen>
 
     <!-- DIALOGS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 

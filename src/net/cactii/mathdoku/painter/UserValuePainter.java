@@ -27,15 +27,15 @@ public class UserValuePainter extends DigitPainter {
 		mTextPaintNormalInputMode.setTypeface(mPainter.getTypeface());
 
 		mTextPaintMaybeInputMode.setTypeface(mPainter.getTypeface());
-
+		
 	}
 
 	@Override
 	protected void setCellSize(float size) {
-		// 1/3 of cell is used for the cage results. Remainig space can be sued
+		// 1/3 of cell is used for the cage results. Remaining space can be used
 		// to display the user value.
-		int bottomMargin = (int) (size * 0.1);
-		int userValueTextSize = (int) (size * 2 / 3);
+		int bottomMargin = (int) (size * 0.2);
+		int userValueTextSize = (int) (size * 3/4);
 
 		mTextPaintNormalInputMode.setTextSize(userValueTextSize);
 		mTextPaintMaybeInputMode.setTextSize(userValueTextSize);

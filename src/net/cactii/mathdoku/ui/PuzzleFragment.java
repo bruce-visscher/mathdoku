@@ -88,6 +88,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	private Button mDigit8;
 	private Button mDigit9;
 	private ImageButton mDigitC;
+	private ImageButton mDigitM;
 	
 	private Button mClearButton;
 	private Button mUndoButton;
@@ -168,6 +169,10 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		mDigit9.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigitC = (ImageButton)mRootView.findViewById(R.id.digitC);
 		mDigitC.setBackgroundColor(mPainter.getButtonBackgroundColor());
+		mDigitM = (ImageButton)mRootView.findViewById(R.id.digitM);
+		if (mDigitM != null) {
+			mDigitM.setBackgroundColor(mPainter.getButtonBackgroundColor());
+		}
 		
 		mClearButton = (Button) mRootView.findViewById(R.id.clearButton);
 		mClearButton.setBackgroundColor(mPainter.getButtonBackgroundColor());
@@ -280,6 +285,17 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				}
 			}
 		});
+		if (mDigitM != null) {
+			mDigitM.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (mGridPlayerView != null && mGrid != null) {
+						// Toggle input mode
+						mGridPlayerView.toggleInputMode();
+					}
+				}
+			});
+		}
 
 		mGridPlayerView.setFocusable(true);
 		mGridPlayerView.setFocusableInTouchMode(true);
@@ -640,6 +656,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mDigit7.setTextColor(mPainter.getDigitFgColor());
 			mDigit8.setTextColor(mPainter.getDigitFgColor());
 			mDigit9.setTextColor(mPainter.getDigitFgColor());
+			if (mDigitM != null) {
+				mDigitM.setColorFilter(0x00000000);
+			}
 		} else {
 			mDigit1.setTextColor(mPainter.getDigitFgMaybeColor());
 			mDigit2.setTextColor(mPainter.getDigitFgMaybeColor());
@@ -650,6 +669,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mDigit7.setTextColor(mPainter.getDigitFgMaybeColor());
 			mDigit8.setTextColor(mPainter.getDigitFgMaybeColor());
 			mDigit9.setTextColor(mPainter.getDigitFgMaybeColor());
+			if (mDigitM != null) {
+				mDigitM.setColorFilter(0xaaffc000);
+			}
 		}
 	}
 
@@ -1115,7 +1137,8 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		// Display message
 		mInputModeText.setVisibility(View.VISIBLE);
 		
-		if (mMathDokuPreferences.increaseInputModeChangedCounter() < 4) {
+		if (mMathDokuPreferences.increaseInputModeChangedCounter() < 4 &&
+				!mMathDokuPreferences.isDigitButtonsVisible()) {
 			mInputModeText
 			.setText(inputMode == GridInputMode.NORMAL ? R.string.input_mode_changed_to_normal
 					: R.string.input_mode_changed_to_maybe);

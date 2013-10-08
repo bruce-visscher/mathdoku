@@ -73,7 +73,7 @@ public class CagePainter extends BorderPainter {
 		// Set border for a cage which is selected
 		switch (theme) {
 		case LIGHT:
-			mBorderSelectedPaint.setColor(0xFF000000);
+			mBorderSelectedPaint.setColor(0xFF008800);
 			mBorderSelectedPaint.setAntiAlias(false);
 			break;
 		case DARK:

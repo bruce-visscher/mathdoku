@@ -236,7 +236,8 @@
     <string name="dialog_clear_grid_confirmation_positive_button">Yes, start over</string>
 
     <!-- CONTROLS FOR PUZZLE SOLVING  - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
+    <!-- The text on the maybe button in the button ui. -->
+    <string name="main_ui_maybe">Maybe</string>
 
     <!-- The text on the clear button in the main UI. -->
     <string name="main_ui_clear">Clear</string>

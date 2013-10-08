@@ -63,7 +63,7 @@ public class Painter {
 	 */
 	private Painter() {
 		// Set the typeface
-		mTypefaceTheme = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL);
+		mTypefaceTheme = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD);
 
 		// Set the path effect
 		mPathEffectTheme = new DashPathEffect(new float[] { 2, 2 }, 0);
@@ -72,7 +72,7 @@ public class Painter {
 		mButtonBackgroundColor = 0xFF33B5E5;
 		
 		mDigitFgColor = 0xFFFFFFFF;
-		mDigitFgMaybeColor = 0xFFFFFF00;
+		mDigitFgMaybeColor = 0xFFFFC000;
 
 		// Create the painters
 		mGridPainter = new GridPainter(this);

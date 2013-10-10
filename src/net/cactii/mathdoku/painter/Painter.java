@@ -49,6 +49,7 @@ public class Painter {
 
 	// Background color of buttons and ticker tape
 	private final int mButtonBackgroundColor;
+	private final int mButtonInactiveBackgroundColor;
 	
 	// Foreground colour of maybe button mode.
 	private final int mDigitFgColor;
@@ -70,6 +71,7 @@ public class Painter {
 
 		// Button background color
 		mButtonBackgroundColor = 0xFF33B5E5;
+		mButtonInactiveBackgroundColor = 0xFF1F6F8C;
 		
 		mDigitFgColor = 0xFFFFFFFF;
 		mDigitFgMaybeColor = 0xFFFFC000;
@@ -314,6 +316,15 @@ public class Painter {
 	 */
 	public int getButtonBackgroundColor() {
 		return mButtonBackgroundColor;
+	}
+	
+	/**
+	 * Get the inactive background color for a button.
+	 * 
+	 * @return The background color for a button.
+	 */
+	public int getButtonInactiveBackgroundColor() {
+		return mButtonInactiveBackgroundColor;
 	}
 	
 	/**

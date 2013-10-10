@@ -228,14 +228,15 @@
 		            android:layout_margin="3dp"
 		            android:layout_height="fill_parent"
 		            tools:ignore="ButtonStyle" />
-		        <Button
+		        <ImageButton
 		            android:layout_weight="1"
-                	android:text="@string/main_ui_buttonC"
-		            android:textSize="@dimen/controls_text_size_default"
-		            android:textStyle="bold"
+		            android:id="@+id/digitU"
+                	android:src="@android:drawable/ic_menu_revert"
 		            android:layout_margin="3dp"
-		            android:visibility="invisible"
-		            android:layout_height="fill_parent"
+		            android:layout_height="match_parent"
+		            android:layout_width="match_parent"
+		            android:scaleType="fitCenter"
+		            android:contentDescription="@string/main_ui_undo"
 		            tools:ignore="ButtonStyle" />
 		    </TableRow>
   		</TableLayout>

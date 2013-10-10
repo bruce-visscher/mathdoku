@@ -2,6 +2,7 @@ package net.cactii.mathdoku.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import net.cactii.mathdoku.Preferences;
 import net.cactii.mathdoku.R;
@@ -43,7 +44,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -816,6 +816,9 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 		case VERY_DIFFICULT:
 			puzzleParameterDifficultyRatingBar.setRating(5);
 			break;
+		case RANDOM:
+			puzzleParameterDifficultyRatingBar.setRating(0);
+			break;
 		}
 
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
@@ -847,6 +850,11 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 								.round(puzzleParameterDifficultyRatingBar
 										.getRating());
 						PuzzleComplexity puzzleComplexity;
+						boolean isRandom = false;
+						if (rating == 0) {
+							rating = new Random().nextInt(6);
+							isRandom = true;
+						}
 						if (rating >= 5) {
 							puzzleComplexity = PuzzleComplexity.VERY_DIFFICULT;
 						} else if (rating >= 4) {
@@ -865,7 +873,7 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 								.setPuzzleParameterOperatorsVisible(puzzleParameterDisplayOperatorsCheckBox
 										.isChecked());
 						mMathDokuPreferences
-								.setPuzzleParameterComplexity(puzzleComplexity);
+								.setPuzzleParameterComplexity(isRandom ? PuzzleComplexity.RANDOM : puzzleComplexity);
 
 						// Start a new game with specified parameters
 						startNewGame(gridSize,

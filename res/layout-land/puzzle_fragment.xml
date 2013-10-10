@@ -179,15 +179,16 @@
 		            android:textStyle="bold"
 		            android:layout_margin="2dp"
 		            tools:ignore="ButtonStyle" />
-		        <Button
+		        <ImageButton
+		            android:id="@+id/digitU"
 		            android:layout_weight="1"
-                	android:text="@string/main_ui_buttonC"
-		            android:textSize="@dimen/controls_text_size_default"
-		            android:textStyle="bold"
+		            android:layout_height="match_parent"
+		            android:layout_width="match_parent"
+		            android:scaleType="fitCenter"
+                	android:src="@android:drawable/ic_menu_revert"
 		            android:layout_margin="2dp"
-		            android:visibility="invisible"
+					android:contentDescription="@string/main_ui_undo"
 		            tools:ignore="ButtonStyle" />
-
           </TableRow>
 		    </TableLayout>
         <TextView

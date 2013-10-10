@@ -1,5 +1,7 @@
 package net.cactii.mathdoku.ui;
 
+import java.util.ArrayList;
+
 import net.cactii.mathdoku.Cheat;
 import net.cactii.mathdoku.Cheat.CheatType;
 import net.cactii.mathdoku.GameTimer;
@@ -31,9 +33,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -87,8 +87,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	private Button mDigit7;
 	private Button mDigit8;
 	private Button mDigit9;
-	private ImageButton mDigitC;
-	private ImageButton mDigitM;
+	private ImageButton mDigitC; // Clear.
+	private ImageButton mDigitM; // Maybe.
+	private ImageButton mDigitU; // Undo.
 	
 	private Button mClearButton;
 	private Button mUndoButton;
@@ -150,28 +151,19 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 
 		mButtonsTableLayout = (TableLayout)mRootView.findViewById(R.id.digitButtons);
 		mDigit1 = (Button)mRootView.findViewById(R.id.digit1);
-		mDigit1.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit2 = (Button)mRootView.findViewById(R.id.digit2);
-		mDigit2.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit3 = (Button)mRootView.findViewById(R.id.digit3);
-		mDigit3.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit4 = (Button)mRootView.findViewById(R.id.digit4);
-		mDigit4.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit5 = (Button)mRootView.findViewById(R.id.digit5);
-		mDigit5.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit6 = (Button)mRootView.findViewById(R.id.digit6);
-		mDigit6.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit7 = (Button)mRootView.findViewById(R.id.digit7);
-		mDigit7.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit8 = (Button)mRootView.findViewById(R.id.digit8);
-		mDigit8.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigit9 = (Button)mRootView.findViewById(R.id.digit9);
-		mDigit9.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigitC = (ImageButton)mRootView.findViewById(R.id.digitC);
-		mDigitC.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		mDigitM = (ImageButton)mRootView.findViewById(R.id.digitM);
-		if (mDigitM != null) {
-			mDigitM.setBackgroundColor(mPainter.getButtonBackgroundColor());
+		mDigitU = (ImageButton)mRootView.findViewById(R.id.digitU);
+		for (View button : allButtons(false)) {
+			button.setBackgroundColor(mPainter.getButtonBackgroundColor());
 		}
 		
 		mClearButton = (Button) mRootView.findViewById(R.id.clearButton);
@@ -221,7 +213,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				}
 			}
 		});
-		
+
 		mDigit1.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -282,6 +274,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				if (mGridPlayerView != null) {
 					mGridPlayerView.digitSelected(0);
 					mGridPlayerView.invalidate();
+					setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
 				}
 			}
 		});
@@ -292,6 +285,22 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 					if (mGridPlayerView != null && mGrid != null) {
 						// Toggle input mode
 						mGridPlayerView.toggleInputMode();
+					}
+				}
+			});
+		}
+		if (mDigitU != null) {
+			mDigitU.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (mGrid.undoLastMove()) {
+						// Successful undo
+						setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
+						mGridPlayerView.invalidate();
+	
+						// Undo can toggle the visibility of the check progress
+						// button in the action bar
+						((FragmentActivity) mContext).invalidateOptionsMenu();
 					}
 				}
 			});
@@ -596,10 +605,33 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		}
 	}
 	
+	private ArrayList<View> allButtons(boolean onlyDigits) {
+		ArrayList<View> usedbuttons = new ArrayList<View>();
+		View[] buttons = {mDigit1, mDigit2, mDigit3, mDigit4, mDigit5, mDigit6,
+				          mDigit7, mDigit8, mDigit9, mDigitC, mDigitM, mDigitU};
+		int length;
+		if (onlyDigits) {
+			length = 9;
+		} else {
+			length = buttons.length;
+		}
+		for (int i=0 ; i < length ; i++) {
+			if (buttons[i] != null) {
+				usedbuttons.add(buttons[i]);
+			}
+		}
+		return usedbuttons;
+	}
+	
 	/**
 	 * Set the correct visibility of the digit select buttons.
 	 */
 	private void setDigitButtons() {
+		boolean sound = mMathDokuPreferences.isPlaySoundEffectEnabled();
+		for (View button : allButtons(false)) {
+			button.setSoundEffectsEnabled(sound);
+		}
+
 		if (mMathDokuPreferences.isDigitButtonsVisible()) {
 			mDigit5.setVisibility(View.INVISIBLE);
 			mDigit6.setVisibility(View.INVISIBLE);
@@ -622,24 +654,17 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			setDigitButtonsMode();
 			mButtonsTableLayout.setVisibility(View.VISIBLE);
 			mTickerTape.setDisabled(true);
-			mDigit1.invalidate();
-			mDigit2.invalidate();
-			mDigit3.invalidate();
-			mDigit4.invalidate();
-			mDigit5.invalidate();
-			mDigit6.invalidate();
-			mDigit7.invalidate();
-			mDigit8.invalidate();
-			mDigit9.invalidate();
-			mDigitC.invalidate();
+			for (View button : allButtons(false)) {
+				button.invalidate();
+			}
 			mButtonsTableLayout.invalidate();
 			mUndoButton.setVisibility(View.GONE);
 			mClearButton.setVisibility(View.GONE);
 		} else {
 			mButtonsTableLayout.setVisibility(View.GONE);
 			mTickerTape.setDisabled(false);
-			setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
 		}
+		setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
 	}
 	
 	/**
@@ -647,28 +672,18 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	 */
 	private void setDigitButtonsMode() {
 		if (mGridPlayerView.getGridInputMode() == GridInputMode.NORMAL) {
-			mDigit1.setTextColor(mPainter.getDigitFgColor());
-			mDigit2.setTextColor(mPainter.getDigitFgColor());
-			mDigit3.setTextColor(mPainter.getDigitFgColor());
-			mDigit4.setTextColor(mPainter.getDigitFgColor());
-			mDigit5.setTextColor(mPainter.getDigitFgColor());
-			mDigit6.setTextColor(mPainter.getDigitFgColor());
-			mDigit7.setTextColor(mPainter.getDigitFgColor());
-			mDigit8.setTextColor(mPainter.getDigitFgColor());
-			mDigit9.setTextColor(mPainter.getDigitFgColor());
+			for (View button : allButtons(true)) {
+				Button tb = (Button)button;
+				tb.setTextColor(mPainter.getDigitFgColor());;
+			}
 			if (mDigitM != null) {
 				mDigitM.setColorFilter(0x00000000);
 			}
 		} else {
-			mDigit1.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit2.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit3.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit4.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit5.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit6.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit7.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit8.setTextColor(mPainter.getDigitFgMaybeColor());
-			mDigit9.setTextColor(mPainter.getDigitFgMaybeColor());
+			for (View button : allButtons(true)) {
+				Button tb = (Button)button;
+				tb.setTextColor(mPainter.getDigitFgMaybeColor());;
+			}
 			if (mDigitM != null) {
 				mDigitM.setColorFilter(0xaaffc000);
 			}
@@ -906,22 +921,27 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	 *            should be visible. Use null in case no cell is selected.
 	 */
 	private void setClearAndUndoButtonVisibility(GridCell cell) {
-		boolean hideButtons = mMathDokuPreferences.isDigitButtonsVisible();
-		if (mClearButton != null) {
-			if (hideButtons || cell == null || cell.isEmpty()) {
-				mClearButton.setVisibility(View.INVISIBLE);
-			} else {
-				mClearButton.setVisibility(View.VISIBLE);
+		boolean digitButtons = mMathDokuPreferences.isDigitButtonsVisible();
+		boolean hideClear = cell == null || cell.isEmpty();
+		boolean hideUndo = mGrid == null || mGrid.countMoves() == 0 || mGrid.isActive() == false;
+		if (digitButtons) {
+			if (mDigitC != null) {
+				mDigitC.setEnabled(!hideClear);
+				mDigitC.setBackgroundColor(hideClear ? mPainter.getButtonInactiveBackgroundColor() :
+														mPainter.getButtonBackgroundColor());
 			}
-			mClearButton.invalidate();
-		}
-		if (mUndoButton != null) {
-			if (hideButtons || mGrid == null || mGrid.countMoves() == 0 || mGrid.isActive() == false) {
-				mUndoButton.setVisibility(View.INVISIBLE);
-			} else {
-				mUndoButton.setVisibility(View.VISIBLE);
+			if (mDigitU != null) {
+				mDigitU.setEnabled(!hideUndo);
+				mDigitU.setBackgroundColor(hideUndo ? mPainter.getButtonInactiveBackgroundColor() :
+					mPainter.getButtonBackgroundColor());
 			}
-			mUndoButton.invalidate();
+		} else {
+			if (mClearButton != null) {
+				mClearButton.setVisibility(hideClear ? View.INVISIBLE : View.VISIBLE);
+			}
+			if (mUndoButton != null) {
+				mUndoButton.setVisibility(hideUndo ? View.INVISIBLE : View.VISIBLE);
+			}
 		}
 	}
 
@@ -1182,6 +1202,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	private void setDigitSelected(int digit) {
 		mGridPlayerView.digitSelected(digit);
 		mGridPlayerView.invalidate();
+		setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package net.cactii.mathdoku.grid.ui;
 
+import net.cactii.mathdoku.Preferences;
 import net.cactii.mathdoku.developmentHelper.DevelopmentHelper;
 import net.cactii.mathdoku.developmentHelper.DevelopmentHelper.Mode;
 import net.cactii.mathdoku.grid.Grid;
@@ -80,6 +81,8 @@ public class SwipeMotion {
 	// Event time at which the previous swipe position was advised to be updated
 	private long mPreviousSwipePositionEventTime = -1l;
 	private long mCurrentSwipePositionEventTime = -1l;
+	
+	private Preferences mPrefs;
 
 	// The swipe circle has to display a maximum of 9 digits. So the circle has
 	// to be divided in 9 segments of each 40 degrees width. The digits will be
@@ -106,6 +109,7 @@ public class SwipeMotion {
 
 		mStatus = Status.INIT;
 		mVisible = false;
+		mPrefs = Preferences.getInstance();
 	}
 
 	/**
@@ -245,7 +249,7 @@ public class SwipeMotion {
 	 * @return True in case the motion is visible. False otherwise.
 	 */
 	protected boolean isVisible() {
-		return mVisible;
+		return mPrefs.isSwipeCircleVisible() && mVisible;
 	}
 
 	/**
@@ -470,7 +474,7 @@ public class SwipeMotion {
 				break;
 			}
 		}
-		if (acceptDigit) {
+		if (acceptDigit && mPrefs.isSwipeCircleVisible()) {
 			mCurrentSwipePositionDigit = digit;
 			return true;
 		}

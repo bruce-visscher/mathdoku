@@ -173,8 +173,13 @@ public class GridViewerView extends View {
 
 		// Get the maximum space available for the grid. As it is a square we
 		// need the minimum of width and height.
-		int maxSize = Math.min(measuredWidth, measuredHeight);
-
+		int maxSize;
+		if (measuredHeight > 1000 && measuredHeight < 1100) {
+			// Hack for Nexus 4. :(
+			maxSize = Math.min(measuredWidth, measuredHeight)*95/100;
+		} else {
+			maxSize = Math.min(measuredWidth, measuredHeight);
+		}
 		// Compute the exact size needed to display a grid in which the
 		// (integer) cell size is as big as possible but the grid still fits in
 		// the space available.

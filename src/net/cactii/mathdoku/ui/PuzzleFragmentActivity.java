@@ -47,6 +47,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
@@ -782,6 +783,10 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 				.findViewById(R.id.puzzleParameterDisplayOperatorsCheckBox);
 		final RatingBar puzzleParameterDifficultyRatingBar = (RatingBar) view
 				.findViewById(R.id.puzzleParameterDifficultyRatingBar);
+		final TextView puzzleParameterDifficultyTextView = (TextView) view
+				.findViewById(R.id.puzzleParameterDifficultyTextView);
+		final CheckBox puzzleParameterRandomCheckBox = (CheckBox) view
+				.findViewById(R.id.puzzleParameterRandomCheckBox);
 
 		// Create the list of available puzzle sizes.
 		String[] puzzleSizes = { "4x4", "5x5", "6x6", "7x7", "8x8", "9x9" };
@@ -803,23 +808,63 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 		switch (mMathDokuPreferences.getPuzzleParameterComplexity()) {
 		case VERY_EASY:
 			puzzleParameterDifficultyRatingBar.setRating(1);
+			puzzleParameterDifficultyTextView.setText("Difficulty: Very easy");
 			break;
 		case EASY:
 			puzzleParameterDifficultyRatingBar.setRating(2);
+			puzzleParameterDifficultyTextView.setText("Difficulty: Easy");
 			break;
 		case NORMAL:
 			puzzleParameterDifficultyRatingBar.setRating(3);
+			puzzleParameterDifficultyTextView.setText("Difficulty: Normal");
 			break;
 		case DIFFICULT:
 			puzzleParameterDifficultyRatingBar.setRating(4);
+			puzzleParameterDifficultyTextView.setText("Difficulty: Difficult");
 			break;
 		case VERY_DIFFICULT:
 			puzzleParameterDifficultyRatingBar.setRating(5);
+			puzzleParameterDifficultyTextView.setText("Difficulty: Very difficult");
 			break;
 		case RANDOM:
 			puzzleParameterDifficultyRatingBar.setRating(0);
+			puzzleParameterDifficultyTextView.setText("Difficulty:");
+			puzzleParameterDifficultyRatingBar.setEnabled(false);
+			puzzleParameterRandomCheckBox.setChecked(true);
 			break;
 		}
+		puzzleParameterDifficultyRatingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+			//TODO: Use strings.xml
+			@Override
+			public void onRatingChanged(RatingBar ratingBar, float rating,
+					boolean fromUser) {
+				if (rating <= 1) {
+					puzzleParameterDifficultyTextView.setText("Difficulty: Very easy");
+				} else if (rating == 2) {
+					puzzleParameterDifficultyTextView.setText("Difficulty: Easy");
+				} else if (rating == 3) {
+					puzzleParameterDifficultyTextView.setText("Difficulty: Normal");
+				} else if (rating == 4) {
+					puzzleParameterDifficultyTextView.setText("Difficulty: Difficult");
+				} else if (rating == 5) {
+					puzzleParameterDifficultyTextView.setText("Difficulty: Very difficult");
+				}
+			}
+		});
+		puzzleParameterRandomCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					puzzleParameterDifficultyRatingBar.setRating(0);
+					puzzleParameterDifficultyRatingBar.setEnabled(false);
+					puzzleParameterDifficultyTextView.setText("Difficulty:");
+				} else {
+					puzzleParameterDifficultyRatingBar.setRating(2);
+					puzzleParameterDifficultyRatingBar.setEnabled(true);
+				}
+			}
+		});
 
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
 				.setTitle(R.string.dialog_puzzle_parameters_title)

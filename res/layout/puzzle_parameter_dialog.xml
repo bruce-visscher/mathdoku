@@ -64,7 +64,24 @@
         android:layout_marginTop="5dp"
         android:text="@string/dialog_puzzle_parameters_difficulty"
         android:textSize="@dimen/dialog_text_size_body" />
-
+    
+        <CheckBox
+            android:id="@+id/puzzleParameterRandomCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/puzzleParameterDifficultyTextView"
+            android:layout_alignParentRight="true"
+            android:checked="false" />
+        
+    <TextView
+        android:id="@+id/puzzleParameterRandomTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/puzzleParameterRandomCheckBox"
+        android:layout_alignBaseline="@+id/puzzleParameterDifficultyTextView"
+        android:text="Random"
+        android:textSize="@dimen/dialog_text_size_body" />
+    
     <RatingBar
         android:id="@+id/puzzleParameterDifficultyRatingBar"
         android:layout_width="wrap_content"
@@ -73,7 +90,7 @@
         android:layout_centerHorizontal="true"
         android:max="5"
         android:numStars="5"
-        android:rating="1"
+        android:rating="2"
         android:stepSize="1" />
 
 </RelativeLayout>

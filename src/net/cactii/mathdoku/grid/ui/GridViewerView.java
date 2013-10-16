@@ -7,12 +7,14 @@ import net.cactii.mathdoku.grid.GridCell;
 import net.cactii.mathdoku.painter.GridPainter;
 import net.cactii.mathdoku.painter.Painter;
 import net.cactii.mathdoku.painter.Painter.DigitPainterMode;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 public class GridViewerView extends View {
 	@SuppressWarnings("unused")
@@ -165,7 +167,7 @@ public class GridViewerView extends View {
 		invalidate();
 	}
 
-	@Override
+	@SuppressLint("NewApi")
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		// Get maximum width and height available to display the grid view.
 		int measuredWidth = measure(widthMeasureSpec);
@@ -174,9 +176,10 @@ public class GridViewerView extends View {
 		// Get the maximum space available for the grid. As it is a square we
 		// need the minimum of width and height.
 		int maxSize;
-		if (measuredHeight > 1000 && measuredHeight < 1100) {
+		ViewConfiguration vc = ViewConfiguration.get(mContext);
+		if (!vc.hasPermanentMenuKey()) {
 			// Hack for Nexus 4. :(
-			maxSize = Math.min(measuredWidth, measuredHeight)*95/100;
+			maxSize = Math.min(measuredWidth, measuredHeight)*94/100;
 		} else {
 			maxSize = Math.min(measuredWidth, measuredHeight);
 		}

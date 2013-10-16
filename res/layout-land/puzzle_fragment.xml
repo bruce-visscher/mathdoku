@@ -76,19 +76,24 @@
 
         <!-- Input mode text should be positioned below timer because of z-layering. In case it is displayed it should cover the timer text and the ticker tape. -->
 
-		<TableLayout
+		<LinearLayout
 		    android:id="@+id/digitButtons"
 		    android:layout_width="fill_parent"
 		    android:layout_height="wrap_content"
 		    android:layout_below="@id/tickerTape"
+		    android:orientation="vertical"
 		    android:paddingTop="10dp">
 
-		   <TableRow>
+		   <LinearLayout android:orientation="horizontal"
+		       	android:layout_width="fill_parent"
+		    	android:layout_height="fill_parent">
 		        <Button android:text="@string/main_ui_button1"
 		            android:id="@+id/digit1"
 		            android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle" />
 		        <Button android:text="@string/main_ui_button2"
@@ -96,6 +101,8 @@
 		       		android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle"     
 		            />
@@ -104,6 +111,8 @@
 		          	android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle"  
 		            />
@@ -117,13 +126,17 @@
 		            android:layout_margin="2dp"
 					android:contentDescription="@string/main_ui_maybe"
 		            tools:ignore="ButtonStyle" />
-		    </TableRow>
-		    <TableRow>
+		    </LinearLayout>
+		    <LinearLayout android:orientation="horizontal"
+		        android:layout_width="fill_parent"
+		    	android:layout_height="fill_parent">
 		        <Button android:text="@string/main_ui_button4"
 		            android:id="@+id/digit4"
 		            android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle"
 		            />
@@ -132,6 +145,8 @@
 		            android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle"
 		            />
@@ -141,6 +156,8 @@
 		            android:text="@string/main_ui_button6"
 		            android:textSize="@dimen/controls_text_size_default"
 		            android:textStyle="bold"
+		            android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
 		            android:layout_margin="2dp"
 		            tools:ignore="ButtonStyle" />
 		        <ImageButton
@@ -153,13 +170,17 @@
 		            android:layout_margin="2dp"
 					android:contentDescription="@string/main_ui_clear"
 		            tools:ignore="ButtonStyle" />
-		    </TableRow>
-		    <TableRow>
+		    </LinearLayout>
+		    <LinearLayout android:orientation="horizontal"
+		        android:layout_width="fill_parent"
+		    	android:layout_height="fill_parent">
 		        <Button android:text="@string/main_ui_button7"
 		            android:id="@+id/digit7"
 		            android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle"
 		            />
@@ -168,6 +189,8 @@
 		            android:textSize="@dimen/controls_text_size_default"
                 	android:textStyle="bold"
                 	android:layout_weight="1"
+                	android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
                 	android:layout_margin="2dp"
                 	tools:ignore="ButtonStyle"
 		            />
@@ -177,6 +200,8 @@
 		            android:text="@string/main_ui_button9"
 		            android:textSize="@dimen/controls_text_size_default"
 		            android:textStyle="bold"
+		            android:layout_width="fill_parent"
+                	android:layout_height="fill_parent"
 		            android:layout_margin="2dp"
 		            tools:ignore="ButtonStyle" />
 		        <ImageButton
@@ -189,8 +214,8 @@
 		            android:layout_margin="2dp"
 					android:contentDescription="@string/main_ui_undo"
 		            tools:ignore="ButtonStyle" />
-          </TableRow>
-		    </TableLayout>
+          </LinearLayout>
+		    </LinearLayout>
         <TextView
             android:id="@+id/input_mode_text"
             android:layout_width="wrap_content"

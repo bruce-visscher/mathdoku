@@ -45,8 +45,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,7 +77,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 
 	private TickerTape mTickerTape;
 
-	private TableLayout mButtonsTableLayout;
+	private LinearLayout mButtonsLayout;
 	private Button mDigit1;
 	private Button mDigit2;
 	private Button mDigit3;
@@ -149,7 +149,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				.findViewById(R.id.grid_player_view);
 		mTimerText = (TextView) mRootView.findViewById(R.id.timerText);
 
-		mButtonsTableLayout = (TableLayout)mRootView.findViewById(R.id.digitButtons);
+		mButtonsLayout = (LinearLayout)mRootView.findViewById(R.id.digitButtons);
 		mDigit1 = (Button)mRootView.findViewById(R.id.digit1);
 		mDigit2 = (Button)mRootView.findViewById(R.id.digit2);
 		mDigit3 = (Button)mRootView.findViewById(R.id.digit3);
@@ -652,16 +652,16 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				mDigit5.setVisibility(View.VISIBLE);				
 			}
 			setDigitButtonsMode();
-			mButtonsTableLayout.setVisibility(View.VISIBLE);
+			mButtonsLayout.setVisibility(View.VISIBLE);
 			mTickerTape.setDisabled(true);
 			for (View button : allButtons(false)) {
 				button.invalidate();
 			}
-			mButtonsTableLayout.invalidate();
+			mButtonsLayout.invalidate();
 			mUndoButton.setVisibility(View.GONE);
 			mClearButton.setVisibility(View.GONE);
 		} else {
-			mButtonsTableLayout.setVisibility(View.GONE);
+			mButtonsLayout.setVisibility(View.GONE);
 			mTickerTape.setDisabled(false);
 		}
 		setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
@@ -1074,8 +1074,8 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		if (mUndoButton != null) {
 			mUndoButton.setVisibility(View.GONE);
 		}
-		if (mButtonsTableLayout != null) {
-			mButtonsTableLayout.setVisibility(View.GONE);
+		if (mButtonsLayout != null) {
+			mButtonsLayout.setVisibility(View.GONE);
 		}
 	}
 
@@ -1113,9 +1113,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mUndoButton.setVisibility(View.GONE);
 			mUndoButton.invalidate();
 		}
-		if (mButtonsTableLayout != null) {
-			mButtonsTableLayout.setVisibility(View.GONE);
-			mButtonsTableLayout.invalidate();
+		if (mButtonsLayout != null) {
+			mButtonsLayout.setVisibility(View.GONE);
+			mButtonsLayout.invalidate();
 		}
 	}
 

@@ -10,6 +10,7 @@ import net.cactii.mathdoku.painter.Painter.DigitPainterMode;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
@@ -175,13 +176,21 @@ public class GridViewerView extends View {
 
 		// Get the maximum space available for the grid. As it is a square we
 		// need the minimum of width and height.
-		int maxSize;
+		int maxSize = Math.min(measuredWidth, measuredHeight);
+		
 		ViewConfiguration vc = ViewConfiguration.get(mContext);
-		if (!vc.hasPermanentMenuKey()) {
-			// Hack for Nexus 4. :(
-			maxSize = Math.min(measuredWidth, measuredHeight)*94/100;
-		} else {
-			maxSize = Math.min(measuredWidth, measuredHeight);
+		// Some devices with a software navbar will find this bar obstructs
+		// the lower buttons.
+		// In this case, the grid will be shrunk a little to accommodate.
+		if (!vc.hasPermanentMenuKey() &&
+				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+			// Shrink for devices with software navbar.
+			float density = getResources().getDisplayMetrics().density;
+			if (mPreferences.isFullScreenEnabled()) {
+				maxSize -= density * 25; // Navbar (48dp) only.
+			} else {
+				maxSize -= density * (24+12); // Navbar (48dp) and status bar (25dp).
+			}
 		}
 		// Compute the exact size needed to display a grid in which the
 		// (integer) cell size is as big as possible but the grid still fits in

@@ -180,10 +180,10 @@ public class GridViewerView extends View {
 		
 		ViewConfiguration vc = ViewConfiguration.get(mContext);
 		// Some devices with a software navbar will find this bar obstructs
-		// the lower buttons.
+		// the lower digit buttons.
 		// In this case, the grid will be shrunk a little to accommodate.
-		if (!vc.hasPermanentMenuKey() &&
-				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+		if (mPreferences.isDigitButtonsVisible() && !vc.hasPermanentMenuKey() &&
+			getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 			// Shrink for devices with software navbar.
 			float density = getResources().getDisplayMetrics().density;
 			if (mPreferences.isFullScreenEnabled()) {

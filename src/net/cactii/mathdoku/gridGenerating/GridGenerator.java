@@ -1,7 +1,6 @@
 package net.cactii.mathdoku.gridGenerating;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import net.cactii.mathdoku.Preferences;
 import net.cactii.mathdoku.developmentHelper.DevelopmentHelper;
@@ -12,6 +11,7 @@ import net.cactii.mathdoku.grid.GridCell;
 import net.cactii.mathdoku.painter.Painter;
 import net.cactii.mathdoku.storage.database.DatabaseHelper;
 import net.cactii.mathdoku.storage.database.GridDatabaseAdapter;
+import net.cactii.mathdoku.util.Random;
 import net.cactii.mathdoku.util.Util;
 import android.os.AsyncTask;
 import android.util.Log;

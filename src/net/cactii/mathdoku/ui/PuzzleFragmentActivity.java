@@ -2,7 +2,6 @@ package net.cactii.mathdoku.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 import net.cactii.mathdoku.Preferences;
 import net.cactii.mathdoku.R;
@@ -22,6 +21,7 @@ import net.cactii.mathdoku.tip.TipArchiveAvailable;
 import net.cactii.mathdoku.tip.TipDialog;
 import net.cactii.mathdoku.tip.TipStatistics;
 import net.cactii.mathdoku.util.FeedbackEmail;
+import net.cactii.mathdoku.util.Random;
 import net.cactii.mathdoku.util.SharedPuzzle;
 import net.cactii.mathdoku.util.Util;
 import android.annotation.TargetApi;

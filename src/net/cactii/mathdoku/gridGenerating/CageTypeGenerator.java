@@ -1,7 +1,8 @@
 package net.cactii.mathdoku.gridGenerating;
 
 import java.util.ArrayList;
-import java.util.Random;
+
+import net.cactii.mathdoku.util.Random;
 
 import android.util.Log;
 

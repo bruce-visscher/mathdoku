@@ -91,6 +91,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	private ImageButton mDigitM; // Maybe.
 	private ImageButton mDigitU; // Undo.
 	
+	private LinearLayout mClearUndo;
 	private Button mClearButton;
 	private Button mUndoButton;
 	private View[] mSoundEffectViews;
@@ -171,6 +172,8 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 
 		mUndoButton = (Button) mRootView.findViewById(R.id.undoButton);
 		mUndoButton.setBackgroundColor(mPainter.getButtonBackgroundColor());
+		
+		mClearUndo = (LinearLayout) mRootView.findViewById(R.id.clearUndo);
 
 		mTickerTape = (TickerTape) mRootView.findViewById(R.id.tickerTape);
 		mGridPlayerView.setTickerTape(mTickerTape);
@@ -658,11 +661,15 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				button.invalidate();
 			}
 			mButtonsLayout.invalidate();
-			mUndoButton.setVisibility(View.GONE);
-			mClearButton.setVisibility(View.GONE);
+			//mUndoButton.setVisibility(View.GONE);
+			//mClearButton.setVisibility(View.GONE);
+			mClearUndo.setVisibility(View.GONE);
 		} else {
 			mButtonsLayout.setVisibility(View.GONE);
 			mTickerTape.setDisabled(false);
+			//mUndoButton.setVisibility(View.VISIBLE);
+			//mClearButton.setVisibility(View.VISIBLE);
+			mClearUndo.setVisibility(View.VISIBLE);
 		}
 		setClearAndUndoButtonVisibility(mGrid.getSelectedCell());
 	}
@@ -937,10 +944,14 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			}
 		} else {
 			if (mClearButton != null) {
-				mClearButton.setVisibility(hideClear ? View.INVISIBLE : View.VISIBLE);
+				mClearButton.setBackgroundColor(hideClear ? mPainter.getButtonInactiveBackgroundColor() :
+					mPainter.getButtonBackgroundColor());
+				mClearButton.setEnabled(!hideClear);
 			}
 			if (mUndoButton != null) {
-				mUndoButton.setVisibility(hideUndo ? View.INVISIBLE : View.VISIBLE);
+				mUndoButton.setBackgroundColor(hideUndo ? mPainter.getButtonInactiveBackgroundColor() :
+					mPainter.getButtonBackgroundColor());
+				mUndoButton.setEnabled(!hideUndo);
 			}
 		}
 	}
@@ -1068,12 +1079,15 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 		if (mTimerText != null) {
 			mTimerText.setVisibility(View.GONE);
 		}
+		/*
 		if (mClearButton != null) {
 			mClearButton.setVisibility(View.GONE);
 		}
 		if (mUndoButton != null) {
 			mUndoButton.setVisibility(View.GONE);
 		}
+		*/
+		mClearUndo.setVisibility(View.GONE);
 		if (mButtonsLayout != null) {
 			mButtonsLayout.setVisibility(View.GONE);
 		}
@@ -1105,6 +1119,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mInputModeImageView.setVisibility(View.INVISIBLE);
 			mInputModeImageView.invalidate();
 		}
+		/*
 		if (mClearButton != null) {
 			mClearButton.setVisibility(View.GONE);
 			mClearButton.invalidate();
@@ -1113,6 +1128,8 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mUndoButton.setVisibility(View.GONE);
 			mUndoButton.invalidate();
 		}
+		*/
+		mClearUndo.setVisibility(View.GONE);
 		if (mButtonsLayout != null) {
 			mButtonsLayout.setVisibility(View.GONE);
 			mButtonsLayout.invalidate();

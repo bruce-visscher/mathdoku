@@ -21,8 +21,6 @@ public class PuzzlePreferenceFragment extends PreferenceFragment implements
 
 		mPreferences = Preferences.getInstance();
 
-		setThemeSummary();
-
 		// Build list preferences
 		ListPreference listPreference = (ListPreference) findPreference(Preferences.PUZZLE_SETTING_OUTER_SWIPE_CIRCLE);
 		String[] entries = new String[7];
@@ -42,13 +40,16 @@ public class PuzzlePreferenceFragment extends PreferenceFragment implements
 		listPreference.setEntries(entries);
 		listPreference.setEntryValues(entryValues);
 		listPreference.setValue(mPreferences.getOuterSwipeCircleVisibility());
-		setOuterSwipeCircleSummary();
+
 	}
 
 	@Override
 	public void onStart() {
 		mPreferences.mSharedPreferences
 				.registerOnSharedPreferenceChangeListener(this);
+		setOuterSwipeCircleSummary();
+		setThemeSummary();
+		setSwipeOptions();
 		super.onStart();
 	}
 

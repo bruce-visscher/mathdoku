@@ -86,6 +86,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
+                    android:textAlignment="viewEnd"
                     android:text="@string/statistics_general_date_finished"
                     android:textSize="@dimen/text_size_default" />
 
@@ -104,6 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
+                    android:textAlignment="viewEnd"
                     android:text="@string/statistics_general_replays"
                     android:textSize="@dimen/text_size_default" />
 
@@ -122,6 +124,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="5dp"
+                    android:textAlignment="viewEnd"
                     android:text="@string/statistics_general_elapsed_time"
                     android:textSize="@dimen/text_size_default" />
 
@@ -129,6 +132,7 @@
                     android:id="@+id/statistics_general_elapsed_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textStyle="bold"
                     android:textSize="@dimen/text_size_default" />
             </TableRow>
 

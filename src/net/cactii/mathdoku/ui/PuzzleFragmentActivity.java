@@ -202,6 +202,9 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
 			}
 		}
+		if (mPuzzleFragment != null && mPuzzleFragment.mGridPlayerView != null) {
+			mPuzzleFragment.mGridPlayerView.loadNewGrid(mPuzzleFragment.mGrid);
+		}
 		super.onResume();
 	}
 	

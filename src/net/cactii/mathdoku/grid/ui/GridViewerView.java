@@ -14,6 +14,7 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewConfiguration;
 
@@ -185,11 +186,18 @@ public class GridViewerView extends View {
 		if (mPreferences.isDigitButtonsVisible() && !vc.hasPermanentMenuKey() &&
 			getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 			// Shrink for devices with software navbar.
-			float density = getResources().getDisplayMetrics().density;
+			DisplayMetrics metrics = getResources().getDisplayMetrics();
+			float density = metrics.density;
 			if (mPreferences.isFullScreenEnabled()) {
 				maxSize -= density * 25; // Navbar (48dp) only.
 			} else {
 				maxSize -= density * (24+12); // Navbar (48dp) and status bar (25dp).
+			}
+			// Large low density devices may need some further adjustment.
+			int largest = Math.max(metrics.heightPixels, metrics.widthPixels);
+			int dp = Math.round(largest / (metrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+			if (density < DisplayMetrics.DENSITY_MEDIUM && dp > 1024) {
+				maxSize -= density*48;
 			}
 		}
 		// Compute the exact size needed to display a grid in which the

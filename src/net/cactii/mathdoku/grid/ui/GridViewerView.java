@@ -10,7 +10,6 @@ import net.cactii.mathdoku.painter.Painter.DigitPainterMode;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
@@ -188,15 +187,15 @@ public class GridViewerView extends View {
 			// Shrink for devices with software navbar.
 			DisplayMetrics metrics = getResources().getDisplayMetrics();
 			float density = metrics.density;
+			
 			if (mPreferences.isFullScreenEnabled()) {
 				maxSize -= density * 25; // Navbar (48dp) only.
 			} else {
 				maxSize -= density * (24+12); // Navbar (48dp) and status bar (25dp).
 			}
 			// Large low density devices may need some further adjustment.
-			int largest = Math.max(metrics.heightPixels, metrics.widthPixels);
-			int dp = Math.round(largest / (metrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-			if (density < DisplayMetrics.DENSITY_MEDIUM && dp > 1024) {
+			float ratio = (float)metrics.heightPixels / (float)metrics.widthPixels;
+			if (ratio < 1.5) {
 				maxSize -= density*48;
 			}
 		}

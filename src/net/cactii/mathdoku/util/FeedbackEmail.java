@@ -288,7 +288,7 @@ public class FeedbackEmail {
 										Intent.ACTION_SEND_MULTIPLE);
 								i.setType("message/rfc822");
 								i.putExtra(Intent.EXTRA_EMAIL,
-										new String[] { "info@mathdoku.net" });
+										new String[] { "info@mathdoku.org" });
 								i.putExtra(
 										Intent.EXTRA_SUBJECT,
 										mActivity

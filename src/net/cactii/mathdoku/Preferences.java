@@ -55,6 +55,9 @@ public class Preferences {
 	public final static String PUZZLE_INPUT_MODE_CHANGED_COUNTER = "puzzle_input_mode_changed_counter";
 	public final static int PUZZLE_INPUT_MODE_CHANGED_COUNTER_DEFAULT = 0;
 
+	public final static String PUZZLE_UNDO_COUNTER = "puzzle_undo_counter";
+	public final static int PUZZLE_UNDO_COUNTER_DEFAULT = 0;
+	
 	// Puzzle parameters settings to be set as default values for next game
 	public final static String PUZZLE_PARAMETER_COMPLEXITY = "puzzle_parameter_complexity";
 	public final static String PUZZLE_PARAMETER_COMPLEXITY_DEFAULT = PuzzleComplexity.VERY_EASY
@@ -150,6 +153,7 @@ public class Preferences {
 	private final static int SWIPE_DIGIT_9_COUNTER_ID = 9;
 	private final static int SWIPE_VALID_MOTION_COUNTER_ID = 10;
 	private final static int SWIPE_INVALID_MOTION_COUNTER_ID = 11;
+	private final static int PUZZLE_UNDO_COUNTER_ID = 12;
 	private int[] counters = null;
 
 	/**
@@ -683,10 +687,12 @@ public class Preferences {
 	 */
 	private void initializeCounters() {
 		if (counters == null) {
-			counters = new int[12];
+			counters = new int[13];
 			counters[PUZZLE_INPUT_MODE_CHANGED_COUNTER_ID] = mSharedPreferences
 					.getInt(PUZZLE_INPUT_MODE_CHANGED_COUNTER,
 							PUZZLE_INPUT_MODE_CHANGED_COUNTER_DEFAULT);
+			counters[PUZZLE_UNDO_COUNTER_ID] = mSharedPreferences.getInt(
+					PUZZLE_UNDO_COUNTER, PUZZLE_UNDO_COUNTER_DEFAULT);
 			counters[SWIPE_DIGIT_1_COUNTER_ID] = mSharedPreferences.getInt(
 					SWIPE_DIGIT_1_COUNTER, SWIPE_DIGIT_COUNTER_DEFAULT);
 			counters[SWIPE_DIGIT_2_COUNTER_ID] = mSharedPreferences.getInt(
@@ -838,7 +844,14 @@ public class Preferences {
 	public int increaseInputModeChangedCounter() {
 		return increaseCounter(PUZZLE_INPUT_MODE_CHANGED_COUNTER_ID);
 	}
-
+	/**
+	 * Increase the number of times the undo button has been pressed.
+	 * 
+	 * @return The (updated) number of times the undo button has been pressed.
+	 */
+	public int increaseUndoCounter() {
+		return increaseCounter(PUZZLE_UNDO_COUNTER_ID);
+	}
 	/**
 	 * Commit all counter values to the preferences.
 	 */

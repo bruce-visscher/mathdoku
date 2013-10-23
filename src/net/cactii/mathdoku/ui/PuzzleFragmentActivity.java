@@ -53,6 +53,7 @@ import android.widget.ListView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class PuzzleFragmentActivity extends AppFragmentActivity implements
 		PuzzleFragment.OnGridFinishedListener {
@@ -213,10 +214,17 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 	 */
 	@Override
 	public void onBackPressed() {
-		if (mPuzzleFragment != null && mPuzzleFragment.mGrid != null && mPuzzleFragment.isActive()) {
+		Log.d("MATHDOKU", "UNDO IS " + mPuzzleFragment.mClearUndo.getVisibility());
+		if (mPuzzleFragment != null && mPuzzleFragment.mGrid != null &&
+				mPuzzleFragment.isActive() &&
+				mPuzzleFragment.mClearUndo.getVisibility() != View.VISIBLE &&
+				mPuzzleFragment.mDigitU == null) {
 			if (mPuzzleFragment.mGrid.undoLastMove()) {
 				mPuzzleFragment.mGridPlayerView.invalidate();
 				invalidateOptionsMenu();
+				if (mPuzzleFragment.mMathDokuPreferences.increaseUndoCounter() < 4) {
+					Toast.makeText(mPuzzleFragment.getActivity().getApplicationContext(), "Undo.", Toast.LENGTH_SHORT).show();
+				}
 			}
 		} else {
 			super.onBackPressed();

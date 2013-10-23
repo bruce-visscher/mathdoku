@@ -89,9 +89,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	private Button mDigit9;
 	private ImageButton mDigitC; // Clear.
 	private ImageButton mDigitM; // Maybe.
-	private ImageButton mDigitU; // Undo.
+	public ImageButton mDigitU; // Undo.
 	
-	private LinearLayout mClearUndo;
+	public LinearLayout mClearUndo;
 	private Button mClearButton;
 	private Button mUndoButton;
 	private View[] mSoundEffectViews;

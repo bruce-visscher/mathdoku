@@ -1235,6 +1235,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				mTickerTape.show();
 			}
 		}
+		this.onInputModeChanged(mGridPlayerView.getGridInputMode());
 	}
 
 	/**

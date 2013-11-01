@@ -218,7 +218,7 @@ public class GridViewerView extends View {
 			if (mPreferences.isSwipeCircleVisible()) {
 				mBorderWidth = mGridCellSize / 2;
 			} else {
-				mBorderWidth = 1; // minimal
+				mBorderWidth = 0; // minimal
 			}
 
 		} else {

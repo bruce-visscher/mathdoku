@@ -214,7 +214,6 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 	 */
 	@Override
 	public void onBackPressed() {
-		Log.d("MATHDOKU", "UNDO IS " + mPuzzleFragment.mClearUndo.getVisibility());
 		if (mPuzzleFragment != null && mPuzzleFragment.mGrid != null &&
 				mPuzzleFragment.isActive() &&
 				mPuzzleFragment.mClearUndo.getVisibility() != View.VISIBLE &&

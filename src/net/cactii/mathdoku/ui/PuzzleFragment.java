@@ -34,14 +34,19 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.View.OnClickListener;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.webkit.WebView.FindListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -352,6 +357,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 			mGrid = new Grid();
 			if (mGrid.load(solvingAttemptId)) {
 				setNewGrid(mGrid);
+				if (mGrid.mMaybeMode) {
+					this.onInputModeChanged(GridInputMode.MAYBE);
+				}
 			}
 		}
 
@@ -927,7 +935,7 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 	 *            The cell to be used to check whether the clear and undo button
 	 *            should be visible. Use null in case no cell is selected.
 	 */
-	private void setClearAndUndoButtonVisibility(GridCell cell) {
+	@SuppressLint("NewApi") private void setClearAndUndoButtonVisibility(GridCell cell) {
 		boolean digitButtons = mMathDokuPreferences.isDigitButtonsVisible();
 		boolean hideClear = cell == null || cell.isEmpty();
 		boolean hideUndo = mGrid == null || mGrid.countMoves() == 0 || mGrid.isActive() == false;
@@ -954,8 +962,45 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				mUndoButton.setEnabled(!hideUndo);
 			}
 		}
+		GetAvailableDimensions();
 	}
 
+	private int PxToDp(int px) {
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		return (int) (px / (metrics.densityDpi/160f));
+	}
+	
+	@SuppressLint("NewApi") private void GetAvailableDimensions() {
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		int screenHeightDp = PxToDp(metrics.heightPixels);
+		int screenWidthDp = PxToDp(metrics.widthPixels);
+		
+		// Reduce 56dp due to action bar.
+		screenHeightDp -= 56;
+		// reduce due to mode bar.
+		screenHeightDp -= 25;
+		// 48 dp less if using soft navbar.
+		ViewConfiguration vc = ViewConfiguration.get(mContext);
+		if (android.os.Build.VERSION.SDK_INT >= 14) {
+			if (vc.hasPermanentMenuKey()) {
+				screenHeightDp -= 48;
+			}
+		}
+		// 25dp less if not full screen.
+		if (!mMathDokuPreferences.isFullScreenEnabled()) {
+			screenHeightDp -= 25;
+		}
+		int avail = screenHeightDp - screenWidthDp;
+		if (avail > 140) {
+			return;
+		} else if (avail > 120) {
+			for (View btn : allButtons(false)) {
+				btn.setPadding(8, 8, 8, 8);
+				btn.invalidate();
+			}
+		}
+	}
+	
 	public boolean isActive() {
 		return (mGrid != null && mGrid.isActive());
 	}
@@ -1175,7 +1220,9 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 					: R.string.input_mode_maybe);
 		}
 		mInputModeText.invalidate();
-
+		if (mGrid != null) {
+			mGrid.mMaybeMode = (inputMode == GridInputMode.MAYBE);
+		}
 	}
 
 	/**
@@ -1235,7 +1282,11 @@ public class PuzzleFragment extends android.support.v4.app.Fragment implements
 				mTickerTape.show();
 			}
 		}
-		this.onInputModeChanged(mGridPlayerView.getGridInputMode());
+		if (mGrid.mMaybeMode) {
+			mGridPlayerView.toggleInputMode();
+		} else {
+			this.onInputModeChanged(mGridPlayerView.getGridInputMode());
+		}
 	}
 
 	/**

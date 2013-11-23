@@ -187,22 +187,7 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 			replayPuzzle(mOnResumeReplaySolvingAttempt);
 			mOnResumeReplaySolvingAttempt = -1;
 		}
-		// For small screens, when digit buttons are enabled, hide the action bar and
-		// force portrait.
-		final ActionBar actionBar = getActionBar();
-		DisplayMetrics metrics = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(metrics);
-		float smallest = Math.min(metrics.widthPixels, metrics.heightPixels);
-		if (actionBar != null && smallest < 480) {
-			Preferences prefs = Preferences.getInstance();
-			if (prefs.isDigitButtonsVisible()) {
-				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-				actionBar.hide();
-			} else {
-				actionBar.show();
-				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-			}
-		}
+
 		if (mPuzzleFragment != null && mPuzzleFragment.mGridPlayerView != null) {
 			mPuzzleFragment.mGridPlayerView.loadNewGrid(mPuzzleFragment.mGrid);
 		}
@@ -697,6 +682,29 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 			new TipArchiveAvailable(this).show();
 		}
 	}
+	
+	private void setActionBarVisibility(boolean force) {
+		// For small screens, when digit buttons are enabled, hide the action bar and
+		// force portrait.
+		final ActionBar actionBar = getActionBar();
+		if (force) {
+			actionBar.show();
+			return;
+		}
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		float smallest = Math.min(metrics.widthPixels, metrics.heightPixels);
+		if (actionBar != null && smallest < 480) {
+			Preferences prefs = Preferences.getInstance();
+			if (prefs.isDigitButtonsVisible()) {
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+				actionBar.hide();
+			} else {
+				actionBar.show();
+				setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			}
+		}
+	}
 
 	/**
 	 * Initializes the puzzle fragment. The archive fragment will be disabled.
@@ -720,6 +728,7 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 
 		// Disable the archive fragment
 		mArchiveFragment = null;
+		setActionBarVisibility(false);
 	}
 
 	/**
@@ -741,7 +750,7 @@ public class PuzzleFragmentActivity extends AppFragmentActivity implements
 
 		// Disable the archive fragment
 		mPuzzleFragment = null;
-
+		setActionBarVisibility(true);
 	}
 
 	/**

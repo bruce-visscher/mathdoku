@@ -106,7 +106,7 @@
 
         <LinearLayout android:id="@+id/digitButtons"
 		    android:layout_width="fill_parent"
-		    android:layout_height="fill_parent"
+		    android:layout_height="wrap_content"
 		    android:layout_below="@id/grid_player_view"
 		    android:orientation="vertical"
 		    android:layout_marginLeft="40dp"

@@ -57,6 +57,9 @@ public class Grid {
 
 	// Puzzle is active as long as it has not been solved.
 	private boolean mActive;
+	
+	// If maybe mode is enabled.
+	public boolean mMaybeMode;
 
 	// Which cell is currently be selected? Null if no cell has been selected
 	// yet.
@@ -477,6 +480,8 @@ public class Grid {
 				+ mRevealed
 				+ SolvingAttemptDatabaseAdapter.FIELD_DELIMITER_LEVEL1
 				+ mClearRedundantPossiblesInSameRowOrColumnCount
+				+ SolvingAttemptDatabaseAdapter.FIELD_DELIMITER_LEVEL1
+				+ mMaybeMode
 				+ SolvingAttemptDatabaseAdapter.EOL_DELIMITER);
 
 		// Store information about the cells. Use one line per single
@@ -605,7 +610,9 @@ public class Grid {
 		mRevealed = Boolean.parseBoolean(viewParts[index++]);
 		mClearRedundantPossiblesInSameRowOrColumnCount = Integer
 				.parseInt(viewParts[index++]);
-
+		if (viewParts.length > index) {
+			mMaybeMode = Boolean.parseBoolean(viewParts[index++]);
+		}
 		return true;
 	}
 

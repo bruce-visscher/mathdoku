@@ -14,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewConfiguration;
 
@@ -167,17 +168,8 @@ public class GridViewerView extends View {
 
 		invalidate();
 	}
-
-	@SuppressLint("NewApi")
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		// Get maximum width and height available to display the grid view.
-		int measuredWidth = measure(widthMeasureSpec);
-		int measuredHeight = measure(heightMeasureSpec);
-
-		// Get the maximum space available for the grid. As it is a square we
-		// need the minimum of width and height.
-		int maxSize = Math.min(measuredWidth, measuredHeight);
-		
+	
+	@SuppressLint("NewApi") private int GetAvailableScreenSpace(int maxSize) {
 		// Some devices with a software navbar will find this bar obstructs
 		// the lower digit buttons.
 		// In this case, the grid will be shrunk a little to accommodate.
@@ -186,23 +178,39 @@ public class GridViewerView extends View {
 		if (android.os.Build.VERSION.SDK_INT >= 14) {
 			hasMenuKey = vc.hasPermanentMenuKey();
 		}
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
 		if (mPreferences.isDigitButtonsVisible() && !hasMenuKey &&
 			getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 			// Shrink for devices with software navbar.
-			DisplayMetrics metrics = getResources().getDisplayMetrics();
-			float density = metrics.density;
+			// TODO(bbuxton) Find a much better way of dealing with this.
 			
-			if (mPreferences.isFullScreenEnabled()) {
-				maxSize -= density * 25; // Navbar (48dp) only.
-			} else {
-				maxSize -= density * (24+12); // Navbar (48dp) and status bar (25dp).
-			}
-			// Large low density devices may need some further adjustment.
-			float ratio = (float)metrics.heightPixels / (float)metrics.widthPixels;
-			if (ratio < 1.5) {
-				maxSize -= density*48;
+			float density = metrics.density;
+			if (metrics.densityDpi < 470 || metrics.heightPixels < 1700) {
+				if (mPreferences.isFullScreenEnabled()) {
+					maxSize -= density * 25; // Navbar (48dp) only.
+				} else {
+					maxSize -= density * (24+12); // Navbar (48dp) and status bar (25dp).
+				}
+				// Large low density devices may need some further adjustment.
+				float ratio = (float)metrics.heightPixels / (float)metrics.widthPixels;
+				if (ratio < 1.5) {
+					maxSize -= density*48;
+				}
 			}
 		}
+		return maxSize;
+	}
+
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		// Get maximum width and height available to display the grid view.
+		int measuredWidth = measure(widthMeasureSpec);
+		int measuredHeight = measure(heightMeasureSpec);
+
+		// Get the maximum space available for the grid. As it is a square we
+		// need the minimum of width and height.
+		int maxSize = Math.min(measuredWidth, measuredHeight);
+		//maxSize = GetAvailableScreenSpace(maxSize);
+
 		// Compute the exact size needed to display a grid in which the
 		// (integer) cell size is as big as possible but the grid still fits in
 		// the space available.
